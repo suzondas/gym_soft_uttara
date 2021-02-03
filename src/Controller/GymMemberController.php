@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Controller\AppController;
 use Cake\Database\Expression\IdentifierExpression;
-
+use Cake\Datasource\ConnectionManager;
 // use GoogleCharts;
 
 Class GymMemberController extends AppController
@@ -23,9 +23,15 @@ Class GymMemberController extends AppController
     {
         $session = $this->request->session()->read("User");
         if ($session["role_name"] == "administrator") {
+            $conn = ConnectionManager::get('default');
+            $stmt = $conn->execute("select first_name,last_name, member_id, membership_valid_from, membership_valid_to,
+                branch,id,activated,image from gym_member where role_name = 'member' ");
+            $data = $stmt ->fetchAll('assoc');
+
             /* $data = $this->GymMember->find("all")->where(["OR"=>[["role_name"=>"member"],["role_name"=>"administrator"]]])->hydrate(false)->toArray(); */
-            $data = $this->GymMember->find("all")->contain("Membership")->where(["role_name" => "member"])->hydrate(false)->toArray();
-            // var_dump($data);exit;
+            /*$data = $this->GymMember->find()->select(['first_name','last_name', 'member_id', 'membership_valid_from', 'membership_valid_to',
+                'branch','id','activated','image'])->where(["role_name" => "member"])->toArray();
+             var_dump($data);exit;*/
         } else if ($session["role_name"] == "member") {
             $uid = intval($session["id"]);
             if ($this->GYMFunction->getSettings("member_can_view_other")) {

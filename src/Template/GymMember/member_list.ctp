@@ -86,7 +86,7 @@ $(document).ready(function(){
 					<td>".(($row['membership_valid_from'] != '')?date($this->Gym->getSettings("date_format"),strtotime($row['membership_valid_from'])):'Null')."</td>
 					<td>".(($row['membership_valid_to'] != '')?date($this->Gym->getSettings("date_format"),strtotime($row['membership_valid_to'])):'Null')."</td>
 					<td>{$row['branch']}</td>
-					<td>{$row["membership"]["membership_label"]}</td>
+					<td></td>
 					<td>
 					
 						<a href='{$this->request->base}/GymMember/viewMember/{$row['id']}' title='View' class='btn btn-flat btn-info'><i class='fa fa-eye'></i></a>";

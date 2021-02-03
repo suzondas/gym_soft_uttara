@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Controller\AppController;
 use Cake\ORM\TableRegistry;
 use Gmgt_paypal_class;
+use Cake\Datasource\ConnectionManager;
 
 class MembershipPaymentController extends AppController
 {
@@ -337,6 +338,35 @@ class MembershipPaymentController extends AppController
         }
         $this->render("addExpense");
     }
+    /*
+     * Start Custom Member*/
+
+    public function addCustomMember(){
+        $lastid=0;
+
+        $conn = ConnectionManager::get('default');
+        $stmt = $conn->execute("select * from gym_member order by id desc limit 1");
+        $data = $stmt ->fetchAll('assoc');
+
+        $member_id=intval($data[0]['member_id'])+1;
+        $this->set('member_id',$member_id);
+
+        if($this->request->is('post')){
+            $conn = ConnectionManager::get('default');
+            $custom_member_id = $this->request->data['first_name'];
+            var_dump($custom_member_id);exit;
+            $first_name = $this->request->data['first_name'];
+            $last_name = $this->request->data['last_name'];
+            $stmt = $conn->execute("insert into gym_member (member_id,first_name,last_name) values($id, '$first_name', '$last_name')");
+            return $this->render('addIncome');
+
+        }
+        return $this->render('addCustomMember');
+
+    }
+
+    /*
+     * End Custom Member*/
 
     public function deleteAccountant($id)
     {
@@ -400,7 +430,7 @@ class MembershipPaymentController extends AppController
         $role_name = $user["role_name"];
         $curr_action = $this->request->action;
         $members_actions = ["paymentList", "paymentSuccess", "ipnFunction"];
-        $staff_actions = ["paymentList", "addIncome", "incomeList", "expenseList", "addExpense", "incomeEdit", "expenseEdit"];
+        $staff_actions = ["paymentList", "addIncome", "incomeList", "expenseList", "addExpense", "incomeEdit", "expenseEdit","addCustomMember"];
         $acc_actions = ["paymentList", "addIncome", "incomeList", "expenseList", "addExpense", "incomeEdit", "expenseEdit", "printInvoice", "deleteIncome"];
         switch ($role_name) {
             CASE "member":
