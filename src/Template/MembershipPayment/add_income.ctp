@@ -39,7 +39,7 @@ echo $this->Html->script('select2.min');
                 </div>
                 <div class="form-group">
                     <label class="col-sm-2 control-label">Add New Member: </label>
-                    <div class="col-sm-8"><a href="add_custom_member"><input type="button" value="Add"/></a></div>
+                    <div class="col-sm-8"><a href="add_custom_member"><input type="button" value="Add Member"/></a></div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-2 control-label" for="invoice_label"><?php echo __("Income label"); ?><span

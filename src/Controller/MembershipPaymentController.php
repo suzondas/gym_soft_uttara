@@ -176,7 +176,7 @@ class MembershipPaymentController extends AppController
         $session = $this->request->session()->read("User");
         $this->set("edit", false);
         $members = $this->MembershipPayment->GymMember->find("list", ["keyField" => "id", "valueField" => "name"])->where(["role_name" => "member"]);
-        $members = $members->select(["id", "name" => $members->func()->concat(["first_name" => "literal", " ", "last_name" => "literal"])])->hydrate(false)->toArray();
+        $members = $members->select(["id", "name" => $members->func()->concat(["first_name" => "literal", " ", "last_name" => "literal", "-", "member_id" => "literal"])])->hydrate(false)->toArray();
         $this->set("members", $members);
 
         if ($this->request->is("post")) {
@@ -338,30 +338,36 @@ class MembershipPaymentController extends AppController
         }
         $this->render("addExpense");
     }
+
     /*
      * Start Custom Member*/
 
-    public function addCustomMember(){
-        $lastid=0;
-
-        $conn = ConnectionManager::get('default');
-        $stmt = $conn->execute("select * from gym_member order by id desc limit 1");
-        $data = $stmt ->fetchAll('assoc');
-
-        $member_id=intval($data[0]['member_id'])+1;
-        $this->set('member_id',$member_id);
-
-        if($this->request->is('post')){
+    public function addCustomMember()
+    {
+        if ($this->request->is('post')) {
             $conn = ConnectionManager::get('default');
-            $custom_member_id = $this->request->data['first_name'];
-            var_dump($custom_member_id);exit;
+            $custom_member_id = $this->request->data['custom_member_id'];
             $first_name = $this->request->data['first_name'];
             $last_name = $this->request->data['last_name'];
-            $stmt = $conn->execute("insert into gym_member (member_id,first_name,last_name) values($id, '$first_name', '$last_name')");
-            return $this->render('addIncome');
+            $address = $this->request->data['address'];
+            $mobile = $this->request->data['mobile'];
 
+            $stmt = $conn->prepare("insert into gym_member (member_id,first_name,last_name,role_name,branch, mobile, address) values(?,?,?,?,?,?,?)");
+            $stmt->bind_param($custom_member_id, $first_name, $last_name,'member','uttara', $address ,$mobile );
+            $stmt->execute();
+
+            return $this->redirect(["action" => "addIncome"]);
+        } else {
+            $lastid = 0;
+
+            $conn = ConnectionManager::get('default');
+            $stmt = $conn->execute("select * from gym_member order by id desc limit 1");
+            $data = $stmt->fetchAll('assoc');
+
+            $member_id = intval($data[0]['member_id']) + 1;
+            $this->set('member_id', $member_id);
+            return $this->render('addCustomMember');
         }
-        return $this->render('addCustomMember');
 
     }
 
@@ -430,7 +436,7 @@ class MembershipPaymentController extends AppController
         $role_name = $user["role_name"];
         $curr_action = $this->request->action;
         $members_actions = ["paymentList", "paymentSuccess", "ipnFunction"];
-        $staff_actions = ["paymentList", "addIncome", "incomeList", "expenseList", "addExpense", "incomeEdit", "expenseEdit","addCustomMember"];
+        $staff_actions = ["paymentList", "addIncome", "incomeList", "expenseList", "addExpense", "incomeEdit", "expenseEdit", "addCustomMember"];
         $acc_actions = ["paymentList", "addIncome", "incomeList", "expenseList", "addExpense", "incomeEdit", "expenseEdit", "printInvoice", "deleteIncome"];
         switch ($role_name) {
             CASE "member":

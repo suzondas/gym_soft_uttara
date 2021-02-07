@@ -16,7 +16,9 @@ echo $this->Html->script('select2.min');
     <form class="form-group container" method="post" action="add_custom_member">
         <div class="row">
             <label class="col-sm-2 control-label">Id</label>
-            <div class="col-sm-8"><input class="form-control" type="number" name="custom_member_id" value="<?php echo $member_id; ?>"/> </div>
+            <div class="col-sm-8">
+                <input class="form-control" type="number" name="custom_member_id" value="<?php echo $member_id; ?>"/>
+            </div>
         </div>
         <div class="row">
             <label class="col-sm-2 control-label">First Name</label>
@@ -25,6 +27,14 @@ echo $this->Html->script('select2.min');
         <div class="row">
             <label class="col-sm-2 control-label">Last Name</label>
             <div class="col-sm-8"><input class="form-control" name="last_name"/> </div>
+        </div>
+        <div class="row">
+            <label class="col-sm-2 control-label">Address</label>
+            <div class="col-sm-8"><input class="form-control" name="address"/> </div>
+        </div>
+        <div class="row">
+            <label class="col-sm-2 control-label">Mobile No.</label>
+            <div class="col-sm-8"><input class="form-control" name="mobile"/> </div>
         </div>
         <input class="btn btn-success" type="submit" value="Submit" />
     </form>
