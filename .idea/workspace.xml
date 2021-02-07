@@ -87,7 +87,7 @@
         <entry file="file://$PROJECT_DIR$/src/Controller/MembershipPaymentController.php">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="194">
-              <caret line="355" column="89" selection-start-line="355" selection-start-column="89" selection-end-line="355" selection-end-column="89" />
+              <caret line="352" column="65" selection-start-line="352" selection-start-column="65" selection-end-line="352" selection-end-column="65" />
               <folding>
                 <element signature="e#34#67#0#PHP" expanded="true" />
               </folding>
@@ -254,12 +254,12 @@
       <workItem from="1610424096406" duration="1373000" />
       <workItem from="1611674156842" duration="5830000" />
       <workItem from="1612365710441" duration="9971000" />
-      <workItem from="1612707285584" duration="2403000" />
+      <workItem from="1612707285584" duration="3400000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="19577000" />
+    <option name="totallyTimeSpent" value="20574000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
@@ -278,9 +278,9 @@
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="8" />
       <window_info anchor="bottom" id="Version Control" order="9" />
-      <window_info anchor="bottom" id="Terminal" order="10" weight="0.1816694" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="10" visible="true" weight="0.1816694" />
       <window_info anchor="bottom" id="Event Log" order="11" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="File Transfer" order="12" visible="true" weight="0.29459903" />
+      <window_info anchor="bottom" id="File Transfer" order="12" weight="0.46153846" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -405,7 +405,7 @@
     <entry file="file://$PROJECT_DIR$/src/Controller/MembershipPaymentController.php">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="194">
-          <caret line="355" column="89" selection-start-line="355" selection-start-column="89" selection-end-line="355" selection-end-column="89" />
+          <caret line="352" column="65" selection-start-line="352" selection-start-column="65" selection-end-line="352" selection-end-column="65" />
           <folding>
             <element signature="e#34#67#0#PHP" expanded="true" />
           </folding>

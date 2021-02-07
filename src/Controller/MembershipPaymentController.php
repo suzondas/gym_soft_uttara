@@ -346,16 +346,12 @@ class MembershipPaymentController extends AppController
     {
         if ($this->request->is('post')) {
             $conn = ConnectionManager::get('default');
-            $custom_member_id = $this->request->data['custom_member_id'];
-            $first_name = $this->request->data['first_name'];
-            $last_name = $this->request->data['last_name'];
-            $address = $this->request->data['address'];
-            $mobile = $this->request->data['mobile'];
-
-            $stmt = $conn->prepare("insert into gym_member (member_id,first_name,last_name,role_name,branch, mobile, address) values(?,?,?,?,?,?,?)");
-            $stmt->bind_param($custom_member_id, $first_name, $last_name,'member','uttara', $address ,$mobile );
-            $stmt->execute();
-
+            $custom_member_id = addslashes($this->request->data['custom_member_id']);
+            $first_name = addslashes($this->request->data['first_name']);
+            $last_name = addslashes($this->request->data['last_name']);
+            $address = addslashes($this->request->data['address']);
+            $mobile = addslashes($this->request->data['mobile']);
+            $stmt = $conn->execute("insert into gym_member (member_id,first_name,last_name,role_name,branch, address, mobile) values($custom_member_id, '$first_name', '$last_name','member','uttara','$address','$mobile')");
             return $this->redirect(["action" => "addIncome"]);
         } else {
             $lastid = 0;
