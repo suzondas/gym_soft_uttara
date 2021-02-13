@@ -2,3 +2,6 @@ tmp
 tmp/
 tmp/*
 config/app.php
+vendor
+vendor/
+vendor/*
