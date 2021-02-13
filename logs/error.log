@@ -1,0 +1,102 @@
+2021-02-13 19:01:18 Warning: DebugKit is disabling itself as your host `159.65.224.13` is not in the known safe list of top-level-domains (localhost, invalid, test, example, local). If you would like to force DebugKit on use the `DebugKit.forceEnable` Configure option.
+2021-02-13 19:01:19 Warning: Headers already sent in /var/www/html/uttara/vendor/cakephp/cakephp/src/Error/Debugger.php:855
+2021-02-13 19:01:21 Warning: DebugKit is disabling itself as your host `159.65.224.13` is not in the known safe list of top-level-domains (localhost, invalid, test, example, local). If you would like to force DebugKit on use the `DebugKit.forceEnable` Configure option.
+2021-02-13 19:01:21 Warning: Headers already sent in /var/www/html/uttara/vendor/cakephp/cakephp/src/Error/Debugger.php:855
+2021-02-13 19:01:24 Warning: DebugKit is disabling itself as your host `159.65.224.13` is not in the known safe list of top-level-domains (localhost, invalid, test, example, local). If you would like to force DebugKit on use the `DebugKit.forceEnable` Configure option.
+2021-02-13 19:01:24 Warning: Headers already sent in /var/www/html/uttara/vendor/cakephp/cakephp/src/Error/Debugger.php:855
+2021-02-13 19:02:43 Warning: DebugKit is disabling itself as your host `159.65.224.13` is not in the known safe list of top-level-domains (localhost, invalid, test, example, local). If you would like to force DebugKit on use the `DebugKit.forceEnable` Configure option.
+2021-02-13 19:02:43 Warning: Warning (512): Unable to emit headers. Headers sent in file=/var/www/html/uttara/vendor/cakephp/cakephp/src/Error/Debugger.php line=855 in [/var/www/html/uttara/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 53]
+Request URL: /webroot/
+Client IP: 103.130.113.110
+Trace:
+Cake\Error\BaseErrorHandler::handleError() - CORE/src/Error/BaseErrorHandler.php, line 168
+Cake\Http\ResponseEmitter::emit() - CORE/src/Http/ResponseEmitter.php, line 53
+Cake\Error\ErrorHandler::_sendResponse() - CORE/src/Error/ErrorHandler.php, line 199
+Cake\Error\ErrorHandler::_displayException() - CORE/src/Error/ErrorHandler.php, line 139
+Cake\Error\BaseErrorHandler::handleException() - CORE/src/Error/BaseErrorHandler.php, line 202
+Cake\Error\BaseErrorHandler::wrapAndHandleException() - CORE/src/Error/BaseErrorHandler.php, line 186
+[main] - [internal], line ??
+
+
+
+2021-02-13 19:02:43 Warning: Warning (2): Cannot modify header information - headers already sent by (output started at /var/www/html/uttara/vendor/cakephp/cakephp/src/Error/Debugger.php:855) in [/var/www/html/uttara/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 154]
+Request URL: /webroot/
+Client IP: 103.130.113.110
+Trace:
+Cake\Error\BaseErrorHandler::handleError() - CORE/src/Error/BaseErrorHandler.php, line 168
+header - [internal], line ??
+Cake\Http\ResponseEmitter::emitStatusLine() - CORE/src/Http/ResponseEmitter.php, line 154
+Cake\Http\ResponseEmitter::emit() - CORE/src/Http/ResponseEmitter.php, line 59
+Cake\Error\ErrorHandler::_sendResponse() - CORE/src/Error/ErrorHandler.php, line 199
+Cake\Error\ErrorHandler::_displayException() - CORE/src/Error/ErrorHandler.php, line 139
+Cake\Error\BaseErrorHandler::handleException() - CORE/src/Error/BaseErrorHandler.php, line 202
+Cake\Error\BaseErrorHandler::wrapAndHandleException() - CORE/src/Error/BaseErrorHandler.php, line 186
+[main] - [internal], line ??
+
+
+
+2021-02-13 19:02:43 Warning: Warning (2): Cannot modify header information - headers already sent by (output started at /var/www/html/uttara/vendor/cakephp/cakephp/src/Error/Debugger.php:855) in [/var/www/html/uttara/vendor/cakephp/cakephp/src/Http/ResponseEmitter.php, line 183]
+Request URL: /webroot/
+Client IP: 103.130.113.110
+Trace:
+Cake\Error\BaseErrorHandler::handleError() - CORE/src/Error/BaseErrorHandler.php, line 168
+header - [internal], line ??
+Cake\Http\ResponseEmitter::emitHeaders() - CORE/src/Http/ResponseEmitter.php, line 183
+Cake\Http\ResponseEmitter::emit() - CORE/src/Http/ResponseEmitter.php, line 60
+Cake\Error\ErrorHandler::_sendResponse() - CORE/src/Error/ErrorHandler.php, line 199
+Cake\Error\ErrorHandler::_displayException() - CORE/src/Error/ErrorHandler.php, line 139
+Cake\Error\BaseErrorHandler::handleException() - CORE/src/Error/BaseErrorHandler.php, line 202
+Cake\Error\BaseErrorHandler::wrapAndHandleException() - CORE/src/Error/BaseErrorHandler.php, line 186
+[main] - [internal], line ??
+
+
+
+2021-02-13 19:02:43 Error: [Cake\Routing\Exception\MissingControllerException] Controller class Webroot could not be found. in /var/www/html/uttara/vendor/cakephp/cakephp/src/Http/ControllerFactory.php on line 105
+Exception Attributes: array (
+  'class' => 'Webroot',
+  'plugin' => false,
+  'prefix' => false,
+  '_ext' => false,
+)
+Stack Trace:
+#0 /var/www/html/uttara/vendor/cakephp/cakephp/src/Http/ControllerFactory.php(39): Cake\Http\ControllerFactory->missingController()
+#1 /var/www/html/uttara/vendor/cakephp/cakephp/src/Routing/Filter/ControllerFactoryFilter.php(63): Cake\Http\ControllerFactory->create()
+#2 /var/www/html/uttara/vendor/cakephp/cakephp/src/Routing/Filter/ControllerFactoryFilter.php(48): Cake\Routing\Filter\ControllerFactoryFilter->_getController()
+#3 /var/www/html/uttara/vendor/cakephp/cakephp/src/Routing/DispatcherFilter.php(143): Cake\Routing\Filter\ControllerFactoryFilter->beforeDispatch()
+#4 /var/www/html/uttara/vendor/cakephp/cakephp/src/Event/EventManager.php(351): Cake\Routing\DispatcherFilter->handle()
+#5 /var/www/html/uttara/vendor/cakephp/cakephp/src/Event/EventManager.php(328): Cake\Event\EventManager->_callListener()
+#6 /var/www/html/uttara/vendor/cakephp/cakephp/src/Event/EventDispatcherTrait.php(112): Cake\Event\EventManager->dispatch()
+#7 /var/www/html/uttara/vendor/cakephp/cakephp/src/Http/ActionDispatcher.php(79): Cake\Http\ActionDispatcher->dispatchEvent()
+#8 /var/www/html/uttara/vendor/cakephp/cakephp/src/Routing/Dispatcher.php(66): Cake\Http\ActionDispatcher->dispatch()
+#9 /var/www/html/uttara/webroot/index.php(36): Cake\Routing\Dispatcher->dispatch()
+#10 {main}
+
+
+Request URL: /webroot/
+Client IP: 103.130.113.110
+2021-02-13 19:13:19 Warning: Warning (2): Could not check compatibility between App\Model\Table\StaffMembersTable::buildRules(App\Model\Table\RulesChecker $rules) and Cake\ORM\Table::buildRules(Cake\ORM\RulesChecker $rules), because class App\Model\Table\RulesChecker is not available in [/var/www/html/uttara/src/Model/Table/StaffMembersTable.php, line 16]
+Request URL: /staff-members/staff-list
+Referer URL: http://159.65.224.13/uttara/gym-member/member-list
+Client IP: 103.130.113.110
+Trace:
+Cake\Error\BaseErrorHandler::handleError() - CORE/src/Error/BaseErrorHandler.php, line 168
+include - APP/Model/Table/StaffMembersTable.php, line 6
+Composer\Autoload\includeFile - ROOT/vendor/composer/ClassLoader.php, line 476
+Composer\Autoload\ClassLoader::loadClass() - ROOT/vendor/composer/ClassLoader.php, line 344
+spl_autoload_call - [internal], line ??
+class_exists - [internal], line ??
+Cake\Core\App::_classExistsInBase() - CORE/src/Core/App.php, line 151
+Cake\Core\App::className() - CORE/src/Core/App.php, line 63
+Cake\ORM\Locator\TableLocator::_getClassName() - CORE/src/ORM/Locator/TableLocator.php, line 276
+Cake\ORM\Locator\TableLocator::get() - CORE/src/ORM/Locator/TableLocator.php, line 219
+Cake\Controller\Controller::loadModel() - CORE/src/Datasource/ModelAwareTrait.php, line 127
+Cake\Controller\Controller::__get() - CORE/src/Controller/Controller.php, line 371
+App\Controller\StaffMembersController::staffList() - APP/Controller/StaffMembersController.php, line 15
+Cake\Controller\Controller::invokeAction() - CORE/src/Controller/Controller.php, line 606
+Cake\Http\ActionDispatcher::_invoke() - CORE/src/Http/ActionDispatcher.php, line 120
+Cake\Http\ActionDispatcher::dispatch() - CORE/src/Http/ActionDispatcher.php, line 94
+Cake\Routing\Dispatcher::dispatch() - CORE/src/Routing/Dispatcher.php, line 66
+[main] - ROOT/webroot/index.php, line 36
+
+
+
