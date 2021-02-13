@@ -1,8 +1,8 @@
 <?php
 $servername = "localhost";
-$username = "doorfpbd_doorfpbd";
-$password = "doorfpbd";
-$dbname="doorfpbd_gymbd_gyms";
+$username = "root";
+$password = "Admin!@#$1234";
+$dbname="gymbd_gyms";
 $server_path = 'http://door.fitnessplusbd.com/';
 $image_path='http://door.fitnessplusbd.com/webroot/upload/';
 $image_pa=$image_path;
