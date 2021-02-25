@@ -32,6 +32,7 @@ use Phinx\Db\Table;
 use Phinx\Db\Table\Column;
 use Phinx\Db\Table\Index;
 use Phinx\Db\Table\ForeignKey;
+use Phinx\Migration\MigrationInterface;
 
 class PostgresAdapter extends PdoAdapter implements AdapterInterface
 {
@@ -70,8 +71,8 @@ class PostgresAdapter extends PdoAdapter implements AdapterInterface
                 $db = new \PDO($dsn, $options['user'], $options['pass'], array(\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION));
             } catch (\PDOException $exception) {
                 throw new \InvalidArgumentException(sprintf(
-                    'There was a problem connecting to the database: %s',
-                    $exception->getMessage()
+                    'There was a problem connecting to the database: %s'
+                    , $exception->getMessage()
                 ));
             }
 
@@ -306,19 +307,6 @@ class PostgresAdapter extends PdoAdapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function truncateTable($tableName)
-    {
-        $sql = sprintf(
-            'TRUNCATE TABLE %s',
-            $this->quoteTableName($tableName)
-        );
-
-        $this->execute($sql);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getColumns($tableName)
     {
         $columns = array();
@@ -356,7 +344,7 @@ class PostgresAdapter extends PdoAdapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function hasColumn($tableName, $columnName)
+    public function hasColumn($tableName, $columnName, $options = array())
     {
         $sql = sprintf("SELECT count(*)
             FROM information_schema.columns
@@ -411,7 +399,7 @@ class PostgresAdapter extends PdoAdapter implements AdapterInterface
                 'ALTER TABLE %s RENAME COLUMN %s TO %s',
                 $this->quoteTableName($tableName),
                 $this->quoteColumnName($columnName),
-                $this->quoteColumnName($newColumnName)
+                $newColumnName
             )
         );
         $this->endCommandTimer();
@@ -791,16 +779,16 @@ class PostgresAdapter extends PdoAdapter implements AdapterInterface
             // which enables the use of the "geography" type in combination
             // with SRID 4326.
             case static::PHINX_TYPE_GEOMETRY:
-                return array('name' => 'geography', 'type' => 'geometry', 'srid' => 4326);
+                return array('name' => 'geography', 'geometry', 4326);
                 break;
             case static::PHINX_TYPE_POINT:
-                return array('name' => 'geography', 'type' => 'point', 'srid' => 4326);
+                return array('name' => 'geography', 'point', 4326);
                 break;
             case static::PHINX_TYPE_LINESTRING:
-                return array('name' => 'geography', 'type' => 'linestring', 'srid' => 4326);
+                return array('name' => 'geography', 'linestring', 4326);
                 break;
             case static::PHINX_TYPE_POLYGON:
-                return array('name' => 'geography', 'type' => 'polygon', 'srid' => 4326);
+                return array('name' => 'geography', 'polygon', 4326);
                 break;
             default:
                 if ($this->isArrayType($type)) {
@@ -921,7 +909,7 @@ class PostgresAdapter extends PdoAdapter implements AdapterInterface
         if (is_string($default) && 'CURRENT_TIMESTAMP' !== $default) {
             $default = $this->getConnection()->quote($default);
         } elseif (is_bool($default)) {
-            $default = $this->castToBool($default);
+            $default = $default ? 'TRUE' : 'FALSE';
         }
         return isset($default) ? 'DEFAULT ' . $default : '';
     }
@@ -946,13 +934,6 @@ class PostgresAdapter extends PdoAdapter implements AdapterInterface
                     '(%s, %s)',
                     $column->getPrecision() ? $column->getPrecision() : $sqlType['precision'],
                     $column->getScale() ? $column->getScale() : $sqlType['scale']
-                );
-            } elseif (in_array($sqlType['name'], array('geography'))) {
-                // geography type must be written with geometry type and srid, like this: geography(POLYGON,4326)
-                $buffer[] = sprintf(
-                    '(%s,%s)',
-                    strtoupper($sqlType['type']),
-                    $sqlType['srid']
                 );
             } elseif (!in_array($sqlType['name'], array('integer', 'smallint'))) {
                 if ($column->getLimit() || isset($sqlType['limit'])) {
@@ -1039,7 +1020,7 @@ class PostgresAdapter extends PdoAdapter implements AdapterInterface
     {
         $constraintName = $foreignKey->getConstraint() ?: $tableName . '_' . implode('_', $foreignKey->getColumns());
         $def = ' CONSTRAINT "' . $constraintName . '" FOREIGN KEY ("' . implode('", "', $foreignKey->getColumns()) . '")';
-        $def .= " REFERENCES {$this->quoteTableName($foreignKey->getReferencedTable()->getName())} (\"" . implode('", "', $foreignKey->getReferencedColumns()) . '")';
+        $def .= " REFERENCES {$foreignKey->getReferencedTable()->getName()} (\"" . implode('", "', $foreignKey->getReferencedColumns()) . '")';
         if ($foreignKey->getOnDelete()) {
             $def .= " ON DELETE {$foreignKey->getOnDelete()}";
         }
@@ -1061,7 +1042,37 @@ class PostgresAdapter extends PdoAdapter implements AdapterInterface
 
         $this->fetchAll(sprintf('SET search_path TO %s', $this->getSchemaName()));
 
-        parent::createSchemaTable();
+        return parent::createSchemaTable();
+    }
+
+     /**
+      * {@inheritdoc}
+      */
+    public function migrated(MigrationInterface $migration, $direction, $startTime, $endTime)
+    {
+        if (strcasecmp($direction, MigrationInterface::UP) === 0) {
+            // up
+            $sql = sprintf(
+                "INSERT INTO %s (version, migration_name, start_time, end_time) VALUES ('%s', '%s', '%s', '%s');",
+                $this->getSchemaTableName(),
+                $migration->getVersion(),
+                substr($migration->getName(), 0, 100),
+                $startTime,
+                $endTime
+            );
+
+            $this->query($sql);
+        } else {
+            // down
+            $sql = sprintf(
+                "DELETE FROM %s WHERE version = '%s'",
+                $this->getSchemaTableName(),
+                $migration->getVersion()
+            );
+
+            $this->query($sql);
+        }
+        return $this;
     }
 
     /**
@@ -1187,13 +1198,5 @@ class PostgresAdapter extends PdoAdapter implements AdapterInterface
     {
         $options = $this->getOptions();
         return empty($options['schema']) ? 'public' : $options['schema'];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function castToBool($value)
-    {
-        return (bool) $value ? 'TRUE' : 'FALSE';
     }
 }

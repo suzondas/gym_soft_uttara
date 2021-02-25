@@ -28,11 +28,13 @@ class EnvironmentPanel extends DebugPanel
     /**
      * Get necessary data about environment to pass back to controller
      *
+     * @param \Cake\Controller\Controller $controller The controller.
      * @return array
      */
-    protected function _prepare()
+    protected function _prepare(Controller $controller)
     {
         $return = [];
+
         // PHP Data
         $phpVer = phpversion();
         $return['php'] = array_merge(
@@ -41,15 +43,6 @@ class EnvironmentPanel extends DebugPanel
         );
         unset($return['php']['argv']);
 
-        // ini Data
-        $return['ini'] = [
-            'intl.default_locale' => ini_get('intl.default_locale'),
-            'memory_limit' => ini_get('memory_limit'),
-            'error_reporting' => ini_get('error_reporting'),
-            'upload_max_filesize' => ini_get('upload_max_filesize'),
-            'post_max_size' => ini_get('post_max_size'),
-        ];
-
         // CakePHP Data
         $return['cake'] = [
             'APP' => APP,
@@ -57,7 +50,6 @@ class EnvironmentPanel extends DebugPanel
             'CACHE' => CACHE,
             'CAKE' => CAKE,
             'CAKE_CORE_INCLUDE_PATH' => CAKE_CORE_INCLUDE_PATH,
-            'CONFIG' => CONFIG,
             'CORE_PATH' => CORE_PATH,
             'CAKE_VERSION' => Configure::version(),
             'DS' => DS,
@@ -65,17 +57,17 @@ class EnvironmentPanel extends DebugPanel
             'ROOT' => ROOT,
             'TESTS' => TESTS,
             'TMP' => TMP,
-            'WWW_ROOT' => WWW_ROOT,
+            'WWW_ROOT' => WWW_ROOT
         ];
 
-        $hiddenCakeConstants = array_fill_keys(
+        $cakeConstants = array_fill_keys(
             [
-                'TIME_START', 'SECOND', 'MINUTE', 'HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR',
+                'DS', 'ROOT', 'TIME_START', 'SECOND', 'MINUTE', 'HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR',
             ],
             ''
         );
         $var = get_defined_constants(true);
-        $return['app'] = array_diff_key($var['user'], $return['cake'], $hiddenCakeConstants);
+        $return['app'] = array_diff_key($var['user'], $return['cake'], $cakeConstants);
 
         if (isset($var['hidef'])) {
             $return['hidef'] = $var['hidef'];
@@ -92,6 +84,6 @@ class EnvironmentPanel extends DebugPanel
      */
     public function shutdown(Event $event)
     {
-        $this->_data = $this->_prepare();
+        $this->_data = $this->_prepare($event->subject());
     }
 }

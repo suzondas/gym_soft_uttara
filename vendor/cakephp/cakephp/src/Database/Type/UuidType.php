@@ -1,20 +1,21 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- * @link          https://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * @link          http://cakephp.org CakePHP(tm) Project
  * @since         3.0.0
- * @license       https://opensource.org/licenses/mit-license.php MIT License
+ * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\Database\Type;
 
 use Cake\Database\Driver;
+use Cake\Database\Type;
 use Cake\Utility\Text;
 
 /**
@@ -22,6 +23,7 @@ use Cake\Utility\Text;
  */
 class UuidType extends StringType
 {
+
     /**
      * Casts given value from a PHP type to one acceptable by database
      *
@@ -31,7 +33,7 @@ class UuidType extends StringType
      */
     public function toDatabase($value, Driver $driver)
     {
-        if ($value === null || $value === '' || $value === false) {
+        if ($value === null || $value === '') {
             return null;
         }
 
@@ -59,7 +61,6 @@ class UuidType extends StringType
         if ($value === null || $value === '' || is_array($value)) {
             return null;
         }
-
         return (string)$value;
     }
 }

@@ -215,7 +215,6 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
             $column = new Column();
             $column->setName('id')
                    ->setType('integer')
-                   ->setSigned(isset($options['signed']) ? $options['signed'] : true)
                    ->setIdentity(true);
 
             array_unshift($columns, $column);
@@ -332,19 +331,6 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function truncateTable($tableName)
-    {
-        $sql = sprintf(
-            'TRUNCATE TABLE %s',
-            $this->quoteTableName($tableName)
-        );
-
-        $this->execute($sql);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getColumns($tableName)
     {
         $columns = array();
@@ -396,7 +382,7 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
         if (is_string($default) && 'CURRENT_TIMESTAMP' !== $default) {
             $default = $this->getConnection()->quote($default);
         } elseif (is_bool($default)) {
-            $default = $this->castToBool($default);
+            $default = (int) $default;
         }
         return isset($default) ? ' DEFAULT ' . $default : '';
     }
@@ -641,6 +627,7 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
             return false;
         } else {
             foreach ($foreignKeys as $key) {
+                $a = array_diff($columns, $key['columns']);
                 if ($columns == $key['columns']) {
                     return true;
                 }
@@ -773,9 +760,6 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
                 break;
             case static::PHINX_TYPE_BINARY:
                 return array('name' => 'binary', 'limit' => $limit ? $limit : 255);
-                break;
-            case static::PHINX_TYPE_VARBINARY:
-                return array('name' => 'varbinary', 'limit' => $limit ? $limit : 255);
                 break;
             case static::PHINX_TYPE_BLOB:
                 if ($limit) {
@@ -1047,8 +1031,6 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
         if (($values = $column->getValues()) && is_array($values)) {
             $def .= "('" . implode("', '", $values) . "')";
         }
-        $def .= $column->getEncoding() ? ' CHARACTER SET ' . $column->getEncoding() : '';
-        $def .= $column->getCollation() ? ' COLLATE ' . $column->getCollation() : '';
         $def .= (!$column->isSigned() && isset($this->signedColumnTypes[$column->getType()])) ? ' unsigned' : '' ;
         $def .= ($column->isNull() == false) ? ' NOT NULL' : ' NULL';
         $def .= ($column->isIdentity()) ? ' AUTO_INCREMENT' : '';

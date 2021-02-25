@@ -1,22 +1,21 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- * @link          https://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * @link          http://cakephp.org CakePHP(tm) Project
  * @since         0.2.9
- * @license       https://opensource.org/licenses/mit-license.php MIT License
+ * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\Filesystem;
 
 use DirectoryIterator;
 use Exception;
-use InvalidArgumentException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
@@ -24,10 +23,11 @@ use RecursiveIteratorIterator;
  * Folder structure browser, lists folders and files.
  * Provides an Object interface for Common directory related tasks.
  *
- * @link https://book.cakephp.org/3/en/core-libraries/file-folder.html#folder-api
+ * @link http://book.cakephp.org/3.0/en/core-libraries/file-folder.html#folder-api
  */
 class Folder
 {
+
     /**
      * Default scheme for Folder::copy
      * Recursively merges subfolders with the same name
@@ -71,7 +71,7 @@ class Folder
      *
      * @var string
      */
-    public $path;
+    public $path = null;
 
     /**
      * Sortedness. Whether or not list results
@@ -85,18 +85,16 @@ class Folder
      * Mode to be used on create. Does nothing on windows platforms.
      *
      * @var int
-     * https://book.cakephp.org/3/en/core-libraries/file-folder.html#Cake\Filesystem\Folder::$mode
+     * http://book.cakephp.org/3.0/en/core-libraries/file-folder.html#Cake\Filesystem\Folder::$mode
      */
     public $mode = 0755;
 
     /**
      * Functions array to be called depending on the sort type chosen.
-     *
-     * @var string[]
      */
     protected $_fsorts = [
         self::SORT_NAME => 'getPathname',
-        self::SORT_TIME => 'getCTime',
+        self::SORT_TIME => 'getCTime'
     ];
 
     /**
@@ -132,7 +130,7 @@ class Folder
      *
      * @param string|null $path Path to folder
      * @param bool $create Create folder if not found
-     * @param int|false $mode Mode (CHMOD) to apply to created folder, false to ignore
+     * @param int|bool $mode Mode (CHMOD) to apply to created folder, false to ignore
      */
     public function __construct($path = null, $create = false, $mode = false)
     {
@@ -168,15 +166,14 @@ class Folder
      * Change directory to $path.
      *
      * @param string $path Path to the directory to change to
-     * @return string|false The new path. Returns false on failure
+     * @return string The new path. Returns false on failure
      */
     public function cd($path)
     {
         $path = $this->realpath($path);
-        if ($path !== false && is_dir($path)) {
+        if (is_dir($path)) {
             return $this->path = $path;
         }
-
         return false;
     }
 
@@ -239,11 +236,11 @@ class Folder
         }
 
         if ($dirs) {
-            $dirs = array_merge(...array_values($dirs));
+            $dirs = call_user_func_array('array_merge', $dirs);
         }
 
         if ($files) {
-            $files = array_merge(...array_values($files));
+            $files = call_user_func_array('array_merge', $files);
         }
 
         return [$dirs, $files];
@@ -259,7 +256,6 @@ class Folder
     public function find($regexpPattern = '.*', $sort = false)
     {
         list(, $files) = $this->read($sort);
-
         return array_values(preg_grep('/^' . $regexpPattern . '$/i', $files));
     }
 
@@ -278,7 +274,6 @@ class Folder
         $startsOn = $this->path;
         $out = $this->_findRecursive($pattern, $sort);
         $this->cd($startsOn);
-
         return $out;
     }
 
@@ -305,7 +300,6 @@ class Folder
             $this->cd(Folder::addPathElement($start, $dir));
             $found = array_merge($found, $this->findRecursive($pattern, $sort));
         }
-
         return $found;
     }
 
@@ -331,7 +325,6 @@ class Folder
         if (empty($path)) {
             return false;
         }
-
         return $path[0] === '/' ||
             preg_match('/^[A-Z]:\\\\/i', $path) ||
             substr($path, 0, 2) === '\\\\' ||
@@ -346,7 +339,7 @@ class Folder
      */
     public static function isRegisteredStreamWrapper($path)
     {
-        return preg_match('/^[^:\/\/]+?(?=:\/\/)/', $path, $matches) &&
+        return preg_match('/^[A-Z]+(?=:\/\/)/i', $path, $matches) &&
             in_array($matches[0], stream_get_wrappers());
     }
 
@@ -355,27 +348,10 @@ class Folder
      *
      * @param string $path Path to check
      * @return string Set of slashes ("\\" or "/")
-     * @deprecated 3.7.0 This method will be removed in 4.0.0. Use correctSlashFor() instead.
      */
     public static function normalizePath($path)
     {
-        deprecationWarning('Folder::normalizePath() is deprecated. Use Folder::correctSlashFor() instead.');
-
         return Folder::correctSlashFor($path);
-    }
-
-    /**
-     * Returns a correct set of slashes for given $path. (\\ for Windows paths and / for other paths.)
-     *
-     * @param string $path Path to transform
-     * @return string Path with the correct set of slashes ("\\" or "/")
-     */
-    public static function normalizeFullPath($path)
-    {
-        $to = Folder::correctSlashFor($path);
-        $from = ($to == '/' ? '\\' : '/');
-
-        return str_replace($from, $to, $path);
     }
 
     /**
@@ -386,7 +362,7 @@ class Folder
      */
     public static function correctSlashFor($path)
     {
-        return Folder::isWindowsPath($path) ? '\\' : '/';
+        return (Folder::isWindowsPath($path)) ? '\\' : '/';
     }
 
     /**
@@ -400,7 +376,6 @@ class Folder
         if (Folder::isSlashTerm($path)) {
             return $path;
         }
-
         return $path . Folder::correctSlashFor($path);
     }
 
@@ -415,20 +390,17 @@ class Folder
     {
         $element = (array)$element;
         array_unshift($element, rtrim($path, DIRECTORY_SEPARATOR));
-
         return implode(DIRECTORY_SEPARATOR, $element);
     }
 
     /**
-     * Returns true if the Folder is in the given Cake path.
+     * Returns true if the File is in a given CakePath.
      *
      * @param string $path The path to check.
      * @return bool
-     * @deprecated 3.2.12 This method will be removed in 4.0.0. Use inPath() instead.
      */
     public function inCakePath($path = '')
     {
-        deprecationWarning('Folder::inCakePath() is deprecated. Use Folder::inPath() instead.');
         $dir = substr(Folder::slashTerm(ROOT), 0, -1);
         $newdir = $dir . $path;
 
@@ -436,28 +408,22 @@ class Folder
     }
 
     /**
-     * Returns true if the Folder is in the given path.
+     * Returns true if the File is in given path.
      *
-     * @param string $path The absolute path to check that the current `pwd()` resides within.
-     * @param bool $reverse Reverse the search, check if the given `$path` resides within the current `pwd()`.
+     * @param string $path The path to check that the current pwd() resides with in.
+     * @param bool $reverse Reverse the search, check that pwd() resides within $path.
      * @return bool
-     * @throws \InvalidArgumentException When the given `$path` argument is not an absolute path.
      */
-    public function inPath($path, $reverse = false)
+    public function inPath($path = '', $reverse = false)
     {
-        if (!Folder::isAbsolute($path)) {
-            throw new InvalidArgumentException('The $path argument is expected to be an absolute path.');
-        }
-
         $dir = Folder::slashTerm($path);
         $current = Folder::slashTerm($this->pwd());
 
         if (!$reverse) {
-            $return = preg_match('/^' . preg_quote($dir, '/') . '(.*)/', $current);
+            $return = preg_match('/^(.*)' . preg_quote($dir, '/') . '(.*)/', $current);
         } else {
-            $return = preg_match('/^' . preg_quote($current, '/') . '(.*)/', $dir);
+            $return = preg_match('/^(.*)' . preg_quote($current, '/') . '(.*)/', $dir);
         }
-
         return (bool)$return;
     }
 
@@ -481,12 +447,10 @@ class Folder
             if (@chmod($path, intval($mode, 8))) {
                 //@codingStandardsIgnoreEnd
                 $this->_messages[] = sprintf('%s changed to %s', $path, $mode);
-
                 return true;
             }
 
             $this->_errors[] = sprintf('%s NOT changed to %s', $path, $mode);
-
             return false;
         }
 
@@ -516,7 +480,6 @@ class Folder
                 return true;
             }
         }
-
         return false;
     }
 
@@ -546,7 +509,6 @@ class Folder
             }
             $subdirectories[] = $fullPath ? $item->getRealPath() : $item->getFilename();
         }
-
         return $subdirectories;
     }
 
@@ -585,22 +547,16 @@ class Folder
             if ($type === null) {
                 return [[], []];
             }
-
             return [];
         }
 
-        /**
-         * @var string $itemPath
-         * @var \RecursiveDirectoryIterator $fsIterator
-         */
         foreach ($iterator as $itemPath => $fsIterator) {
             if ($skipHidden) {
                 $subPathName = $fsIterator->getSubPathname();
-                if ($subPathName[0] === '.' || strpos($subPathName, DIRECTORY_SEPARATOR . '.') !== false) {
+                if ($subPathName{0} === '.' || strpos($subPathName, DIRECTORY_SEPARATOR . '.') !== false) {
                     continue;
                 }
             }
-            /** @var \FilesystemIterator $item */
             $item = $fsIterator->current();
             if (!empty($exceptions) && isset($exceptions[$item->getFilename()])) {
                 continue;
@@ -618,7 +574,6 @@ class Folder
         if ($type === 'dir') {
             return $directories;
         }
-
         return $files;
     }
 
@@ -649,7 +604,6 @@ class Folder
 
         if (is_file($pathname)) {
             $this->_errors[] = sprintf('%s is a file', $pathname);
-
             return false;
         }
         $pathname = rtrim($pathname, DIRECTORY_SEPARATOR);
@@ -661,16 +615,13 @@ class Folder
                 if (mkdir($pathname, $mode, true)) {
                     umask($old);
                     $this->_messages[] = sprintf('%s created', $pathname);
-
                     return true;
                 }
                 umask($old);
                 $this->_errors[] = sprintf('%s NOT created', $pathname);
-
                 return false;
             }
         }
-
         return false;
     }
 
@@ -685,7 +636,7 @@ class Folder
         $directory = Folder::slashTerm($this->path);
         $stack = [$directory];
         $count = count($stack);
-        for ($i = 0, $j = $count; $i < $j; $i++) {
+        for ($i = 0, $j = $count; $i < $j; ++$i) {
             if (is_file($stack[$i])) {
                 $size += filesize($stack[$i]);
             } elseif (is_dir($stack[$i])) {
@@ -707,7 +658,6 @@ class Folder
             }
             $j = count($stack);
         }
-
         return $size;
     }
 
@@ -751,7 +701,6 @@ class Folder
                         $this->_messages[] = sprintf('%s removed', $filePath);
                     } else {
                         $this->_errors[] = sprintf('%s NOT removed', $filePath);
-
                         return false;
                     }
                 }
@@ -764,11 +713,9 @@ class Folder
                 $this->_messages[] = sprintf('%s removed', $path);
             } else {
                 $this->_errors[] = sprintf('%s NOT removed', $path);
-
                 return false;
             }
         }
-
         return true;
     }
 
@@ -803,7 +750,7 @@ class Folder
             'mode' => $this->mode,
             'skip' => [],
             'scheme' => Folder::MERGE,
-            'recursive' => true,
+            'recursive' => true
         ];
 
         $fromDir = $options['from'];
@@ -812,7 +759,6 @@ class Folder
 
         if (!$this->cd($fromDir)) {
             $this->_errors[] = sprintf('%s not found', $fromDir);
-
             return false;
         }
 
@@ -822,7 +768,6 @@ class Folder
 
         if (!is_writable($toDir)) {
             $this->_errors[] = sprintf('%s not writable', $toDir);
-
             return false;
         }
 
@@ -903,10 +848,11 @@ class Folder
         }
         $options += ['to' => $to, 'from' => $this->path, 'mode' => $this->mode, 'skip' => [], 'recursive' => true];
 
-        if ($this->copy($options) && $this->delete($options['from'])) {
-            return (bool)$this->cd($options['to']);
+        if ($this->copy($options)) {
+            if ($this->delete($options['from'])) {
+                return (bool)$this->cd($options['to']);
+            }
         }
-
         return false;
     }
 
@@ -922,7 +868,6 @@ class Folder
         if ($reset) {
             $this->_messages = [];
         }
-
         return $messages;
     }
 
@@ -938,7 +883,6 @@ class Folder
         if ($reset) {
             $this->_errors = [];
         }
-
         return $errors;
     }
 
@@ -946,7 +890,7 @@ class Folder
      * Get the real path (taking ".." and such into account)
      *
      * @param string $path Path to resolve
-     * @return string|false The resolved path
+     * @return string The resolved path
      */
     public function realpath($path)
     {
@@ -954,7 +898,6 @@ class Folder
             if (!Folder::isAbsolute($path)) {
                 $path = Folder::addPathElement($this->path, $path);
             }
-
             return $path;
         }
         $path = str_replace('/', DIRECTORY_SEPARATOR, trim($path));
@@ -974,7 +917,6 @@ class Folder
                     array_pop($newparts);
                     continue;
                 }
-
                 return false;
             }
             $newparts[] = $part;
@@ -993,7 +935,6 @@ class Folder
     public static function isSlashTerm($path)
     {
         $lastChar = $path[strlen($path) - 1];
-
         return $lastChar === '/' || $lastChar === '\\';
     }
 }

@@ -8,7 +8,7 @@
  *
  * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  * @link          http://cakephp.org CakePHP(tm) Project
- * @since         1.0.0
+ * @since         v 1.0 (22-Jun-2009)
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 namespace DebugKit\View\Helper;
@@ -16,6 +16,7 @@ namespace DebugKit\View\Helper;
 use Cake\Core\Configure;
 use Cake\Error\Debugger;
 use Cake\Filesystem\File;
+use Cake\Log\Log;
 use Cake\View\Helper;
 
 /**
@@ -25,8 +26,6 @@ use Cake\View\Helper;
  *
  * @uses          AppHelper
  * @since         v 1.0 (22-Jun-2009)
- *
- * @property \DebugKit\View\Helper\ToolbarHelper $Toolbar
  */
 class TidyHelper extends Helper
 {
@@ -50,7 +49,7 @@ class TidyHelper extends Helper
      * Fudge the markup slightly so that the tag which is invalid is highlighted
      *
      * @param string $html ''
-     * @param string $out ''
+     * @param string &$out ''
      * @return array
      */
     public function process($html = '', &$out = '')
@@ -73,7 +72,6 @@ class TidyHelper extends Helper
                 if (isset($markup[$line - 1])) {
                     $string .= h($markup[$line - 1]);
                 }
-                // phpcs:ignore
                 $string .= '<strong>' . h(@$markup[$line]) . '</strong>';
                 if (isset($markup[$line + 1])) {
                     $string .= h($markup[$line + 1]);
@@ -87,7 +85,6 @@ class TidyHelper extends Helper
             }
         }
         $this->results = $result;
-
         return $result;
     }
 
@@ -117,7 +114,6 @@ class TidyHelper extends Helper
                 }
             }
         }
-
         return $this->Toolbar->makeNeatArray(array_filter($this->results), 0, 0, false);
     }
 
@@ -126,7 +122,7 @@ class TidyHelper extends Helper
      * normalized string so that the error messages can be linked to the line that caused them.
      *
      * @param string $in ''
-     * @param string $out ''
+     * @param string &$out ''
      * @return string
      */
     public function tidyErrors($in = '', &$out = '')
@@ -138,7 +134,6 @@ class TidyHelper extends Helper
             $tidy = tidy_parse_string($out, [], 'UTF8');
             $tidy->cleanRepair();
             $errors = $tidy->errorBuffer . "\n";
-
             return $errors;
         }
 
@@ -156,7 +151,6 @@ class TidyHelper extends Helper
         $Error = new File($errors);
         $errors = $Error->read();
         $Error->delete();
-
         return $errors;
     }
 
@@ -164,7 +158,7 @@ class TidyHelper extends Helper
      * exec method
      *
      * @param mixed $cmd ''
-     * @param mixed $out null
+     * @param mixed &$out null
      * @return bool True if successful
      */
     protected function _exec($cmd, &$out = null)
@@ -183,7 +177,6 @@ class TidyHelper extends Helper
         if ($return) {
             return false;
         }
-
         return $_out ? $_out : true;
     }
 }

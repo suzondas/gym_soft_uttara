@@ -1,18 +1,17 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- * @link          https://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * @link          http://cakephp.org CakePHP(tm) Project
  * @since         3.0.0
- * @license       https://opensource.org/licenses/mit-license.php MIT License
+ * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-
 use Cake\I18n\I18n;
 
 if (!function_exists('__')) {
@@ -20,20 +19,18 @@ if (!function_exists('__')) {
      * Returns a translated string if one is found; Otherwise, the submitted message.
      *
      * @param string $singular Text to translate.
-     * @param mixed ...$args Array with arguments or multiple arguments in function.
-     * @return string The translated text.
-     * @link https://book.cakephp.org/3/en/core-libraries/global-constants-and-functions.html#__
+     * @param mixed $args Array with arguments or multiple arguments in function.
+     * @return string|null The translated text, or null if invalid.
+     * @link http://book.cakephp.org/3.0/en/core-libraries/global-constants-and-functions.html#__
      */
-    function __($singular, ...$args)
+    function __($singular, $args = null)
     {
         if (!$singular) {
-            return '';
-        }
-        if (isset($args[0]) && is_array($args[0])) {
-            $args = $args[0];
+            return null;
         }
 
-        return I18n::getTranslator()->translate($singular, $args);
+        $arguments = func_num_args() === 2 ? (array)$args : array_slice(func_get_args(), 1);
+        return I18n::translator()->translate($singular, $arguments);
     }
 
 }
@@ -46,22 +43,20 @@ if (!function_exists('__n')) {
      * @param string $singular Singular text to translate.
      * @param string $plural Plural text.
      * @param int $count Count.
-     * @param mixed ...$args Array with arguments or multiple arguments in function.
-     * @return string Plural form of translated string.
-     * @link https://book.cakephp.org/3/en/core-libraries/global-constants-and-functions.html#__n
+     * @param mixed $args Array with arguments or multiple arguments in function.
+     * @return string|null Plural form of translated string, or null if invalid.
+     * @link http://book.cakephp.org/3.0/en/core-libraries/global-constants-and-functions.html#__n
      */
-    function __n($singular, $plural, $count, ...$args)
+    function __n($singular, $plural, $count, $args = null)
     {
         if (!$singular) {
-            return '';
-        }
-        if (isset($args[0]) && is_array($args[0])) {
-            $args = $args[0];
+            return null;
         }
 
-        return I18n::getTranslator()->translate(
+        $arguments = func_num_args() === 4 ? (array)$args : array_slice(func_get_args(), 3);
+        return I18n::translator()->translate(
             $plural,
-            ['_count' => $count, '_singular' => $singular] + $args
+            ['_count' => $count, '_singular' => $singular] + $arguments
         );
     }
 
@@ -73,20 +68,17 @@ if (!function_exists('__d')) {
      *
      * @param string $domain Domain.
      * @param string $msg String to translate.
-     * @param mixed ...$args Array with arguments or multiple arguments in function.
-     * @return string Translated string.
-     * @link https://book.cakephp.org/3/en/core-libraries/global-constants-and-functions.html#__d
+     * @param mixed $args Array with arguments or multiple arguments in function.
+     * @return string|null Translated string.
+     * @link http://book.cakephp.org/3.0/en/core-libraries/global-constants-and-functions.html#__d
      */
-    function __d($domain, $msg, ...$args)
+    function __d($domain, $msg, $args = null)
     {
         if (!$msg) {
-            return '';
+            return null;
         }
-        if (isset($args[0]) && is_array($args[0])) {
-            $args = $args[0];
-        }
-
-        return I18n::getTranslator($domain)->translate($msg, $args);
+        $arguments = func_num_args() === 3 ? (array)$args : array_slice(func_get_args(), 2);
+        return I18n::translator($domain)->translate($msg, $arguments);
     }
 
 }
@@ -101,22 +93,20 @@ if (!function_exists('__dn')) {
      * @param string $singular Singular string to translate.
      * @param string $plural Plural.
      * @param int $count Count.
-     * @param mixed ...$args Array with arguments or multiple arguments in function.
-     * @return string Plural form of translated string.
-     * @link https://book.cakephp.org/3/en/core-libraries/global-constants-and-functions.html#__dn
+     * @param mixed $args Array with arguments or multiple arguments in function.
+     * @return string|null Plural form of translated string.
+     * @link http://book.cakephp.org/3.0/en/core-libraries/global-constants-and-functions.html#__dn
      */
-    function __dn($domain, $singular, $plural, $count, ...$args)
+    function __dn($domain, $singular, $plural, $count, $args = null)
     {
         if (!$singular) {
-            return '';
-        }
-        if (isset($args[0]) && is_array($args[0])) {
-            $args = $args[0];
+            return null;
         }
 
-        return I18n::getTranslator($domain)->translate(
+        $arguments = func_num_args() === 5 ? (array)$args : array_slice(func_get_args(), 4);
+        return I18n::translator($domain)->translate(
             $plural,
-            ['_count' => $count, '_singular' => $singular] + $args
+            ['_count' => $count, '_singular' => $singular] + $arguments
         );
     }
 
@@ -130,20 +120,18 @@ if (!function_exists('__x')) {
      *
      * @param string $context Context of the text.
      * @param string $singular Text to translate.
-     * @param mixed ...$args Array with arguments or multiple arguments in function.
-     * @return string Translated string.
-     * @link https://book.cakephp.org/3/en/core-libraries/global-constants-and-functions.html#__x
+     * @param mixed $args Array with arguments or multiple arguments in function.
+     * @return string|null Translated string.
+     * @link http://book.cakephp.org/3.0/en/core-libraries/global-constants-and-functions.html#__x
      */
-    function __x($context, $singular, ...$args)
+    function __x($context, $singular, $args = null)
     {
         if (!$singular) {
-            return '';
-        }
-        if (isset($args[0]) && is_array($args[0])) {
-            $args = $args[0];
+            return null;
         }
 
-        return I18n::getTranslator()->translate($singular, ['_context' => $context] + $args);
+        $arguments = func_num_args() === 3 ? (array)$args : array_slice(func_get_args(), 2);
+        return I18n::translator()->translate($singular, ['_context' => $context] + $arguments);
     }
 
 }
@@ -159,22 +147,20 @@ if (!function_exists('__xn')) {
      * @param string $singular Singular text to translate.
      * @param string $plural Plural text.
      * @param int $count Count.
-     * @param mixed ...$args Array with arguments or multiple arguments in function.
-     * @return string Plural form of translated string.
-     * @link https://book.cakephp.org/3/en/core-libraries/global-constants-and-functions.html#__xn
+     * @param mixed $args Array with arguments or multiple arguments in function.
+     * @return string|null Plural form of translated string.
+     * @link http://book.cakephp.org/3.0/en/core-libraries/global-constants-and-functions.html#__xn
      */
-    function __xn($context, $singular, $plural, $count, ...$args)
+    function __xn($context, $singular, $plural, $count, $args = null)
     {
         if (!$singular) {
-            return '';
-        }
-        if (isset($args[0]) && is_array($args[0])) {
-            $args = $args[0];
+            return null;
         }
 
-        return I18n::getTranslator()->translate(
+        $arguments = func_num_args() === 5 ? (array)$args : array_slice(func_get_args(), 2);
+        return I18n::translator()->translate(
             $plural,
-            ['_count' => $count, '_singular' => $singular, '_context' => $context] + $args
+            ['_count' => $count, '_singular' => $singular, '_context' => $context] + $arguments
         );
     }
 
@@ -189,22 +175,20 @@ if (!function_exists('__dx')) {
      * @param string $domain Domain.
      * @param string $context Context of the text.
      * @param string $msg String to translate.
-     * @param mixed ...$args Array with arguments or multiple arguments in function.
-     * @return string Translated string.
-     * @link https://book.cakephp.org/3/en/core-libraries/global-constants-and-functions.html#__dx
+     * @param mixed $args Array with arguments or multiple arguments in function.
+     * @return string|null Translated string.
+     * @link http://book.cakephp.org/3.0/en/core-libraries/global-constants-and-functions.html#__dx
      */
-    function __dx($domain, $context, $msg, ...$args)
+    function __dx($domain, $context, $msg, $args = null)
     {
         if (!$msg) {
-            return '';
-        }
-        if (isset($args[0]) && is_array($args[0])) {
-            $args = $args[0];
+            return null;
         }
 
-        return I18n::getTranslator($domain)->translate(
+        $arguments = func_num_args() === 4 ? (array)$args : array_slice(func_get_args(), 2);
+        return I18n::translator($domain)->translate(
             $msg,
-            ['_context' => $context] + $args
+            ['_context' => $context] + $arguments
         );
     }
 
@@ -222,22 +206,20 @@ if (!function_exists('__dxn')) {
      * @param string $singular Singular text to translate.
      * @param string $plural Plural text.
      * @param int $count Count.
-     * @param mixed ...$args Array with arguments or multiple arguments in function.
-     * @return string Plural form of translated string.
-     * @link https://book.cakephp.org/3/en/core-libraries/global-constants-and-functions.html#__dxn
+     * @param mixed $args Array with arguments or multiple arguments in function.
+     * @return string|null Plural form of translated string.
+     * @link http://book.cakephp.org/3.0/en/core-libraries/global-constants-and-functions.html#__dxn
      */
-    function __dxn($domain, $context, $singular, $plural, $count, ...$args)
+    function __dxn($domain, $context, $singular, $plural, $count, $args = null)
     {
         if (!$singular) {
-            return '';
-        }
-        if (isset($args[0]) && is_array($args[0])) {
-            $args = $args[0];
+            return null;
         }
 
-        return I18n::getTranslator($domain)->translate(
+        $arguments = func_num_args() === 6 ? (array)$args : array_slice(func_get_args(), 2);
+        return I18n::translator($domain)->translate(
             $plural,
-            ['_count' => $count, '_singular' => $singular, '_context' => $context] + $args
+            ['_count' => $count, '_singular' => $singular, '_context' => $context] + $arguments
         );
     }
 

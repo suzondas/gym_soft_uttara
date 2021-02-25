@@ -14,19 +14,11 @@ namespace Migrations\Shell;
 use Cake\Console\Shell;
 use Migrations\MigrationsDispatcher;
 use Symfony\Component\Console\Input\ArgvInput;
-use Symfony\Component\Console\Output\ConsoleOutput;
 
 /**
  * A wrapper shell for phinx migrations, used to inject our own
  * console actions so that database configuration already defined
  * for the application can be reused.
- *
- * @property \Migrations\Shell\Task\CreateTask $Create
- * @property \Migrations\Shell\Task\DumpTask $Dump
- * @property \Migrations\Shell\Task\MarkMigratedTask $MarkMigrated
- * @property \Migrations\Shell\Task\MigrateTask $Migrate
- * @property \Migrations\Shell\Task\RollbackTask $Rollback
- * @property \Migrations\Shell\Task\StatusTask $Status
  */
 class MigrationsShell extends Shell
 {
@@ -67,8 +59,6 @@ class MigrationsShell extends Shell
             ->addOption('seed')
             ->addOption('ansi')
             ->addOption('no-ansi')
-            ->addOption('no-lock', ['boolean' => true])
-            ->addOption('force', ['boolean' => true])
             ->addOption('version', ['short' => 'V'])
             ->addOption('no-interaction', ['short' => 'n'])
             ->addOption('template', ['short' => 't'])
@@ -85,7 +75,7 @@ class MigrationsShell extends Shell
     public function initialize()
     {
         if (!defined('PHINX_VERSION')) {
-            define('PHINX_VERSION', (0 === strpos('@PHINX_VERSION@', '@PHINX_VERSION')) ? '0.4.3' : '@PHINX_VERSION@');
+            define('PHINX_VERSION', (0 === strpos('@PHINX_VERSION@', '@PHINX_VERSION')) ? '0.4.1' : '@PHINX_VERSION@');
         }
         parent::initialize();
     }
@@ -98,19 +88,16 @@ class MigrationsShell extends Shell
      * The input parameter of the ``MigrationDispatcher::run()`` method is manually built
      * in case a MigrationsShell is dispatched using ``Shell::dispatch()``.
      *
-     * @return bool Success of the call.
+     * @return void
      */
     public function main()
     {
-        $app = $this->getApp();
+        $app = new MigrationsDispatcher(PHINX_VERSION);
         $input = new ArgvInput($this->argv);
         $app->setAutoExit(false);
-        $exitCode = $app->run($input, $this->getOutput());
+        $exitCode = $app->run($input);
 
-        if (isset($this->argv[1]) && in_array($this->argv[1], ['migrate', 'rollback']) &&
-            !$this->params['no-lock'] &&
-            $exitCode === 0
-        ) {
+        if (isset($this->argv[1]) && in_array($this->argv[1], ['migrate', 'rollback']) && $exitCode === 0) {
             $dispatchCommand = 'migrations dump';
             if (!empty($this->params['connection'])) {
                 $dispatchCommand .= ' -c ' . $this->params['connection'];
@@ -120,34 +107,8 @@ class MigrationsShell extends Shell
                 $dispatchCommand .= ' -p ' . $this->params['plugin'];
             }
 
-            $dumpExitCode = $this->dispatchShell($dispatchCommand);
+            $this->dispatchShell($dispatchCommand);
         }
-
-        if (isset($dumpExitCode) && $exitCode === 0 && $dumpExitCode !== 0) {
-            $exitCode = 1;
-        }
-
-        return $exitCode === 0;
-    }
-
-    /**
-     * Returns the MigrationsDispatcher the Shell will have to use
-     *
-     * @return \Migrations\MigrationsDispatcher
-     */
-    protected function getApp()
-    {
-        return new MigrationsDispatcher(PHINX_VERSION);
-    }
-
-    /**
-     * Returns the instance of OutputInterface the MigrationsDispatcher will have to use.
-     *
-     * @return \Symfony\Component\Console\Output\ConsoleOutput
-     */
-    protected function getOutput()
-    {
-        return new ConsoleOutput();
     }
 
     /**
@@ -160,7 +121,6 @@ class MigrationsShell extends Shell
     {
         array_unshift($argv, 'migrations');
         $this->argv = $argv;
-
         return parent::runCommand($argv, $autoMethod, $extra);
     }
 
@@ -168,11 +128,11 @@ class MigrationsShell extends Shell
      * Display the help in the correct format
      *
      * @param string $command The command to get help for.
-     * @return int|bool|null Exit code or number of bytes written to stdout
+     * @return void
      */
     protected function displayHelp($command)
     {
-        return $this->main();
+        $this->main();
     }
 
     /**

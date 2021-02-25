@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => '33578e26cef1261ccc3d63355db4c4ddaf6adbbb',
+    'reference' => '15654bb9ea619b291e841a571de25eb95150247e',
     'name' => 'cakephp/app',
   ),
   'versions' => 
@@ -54,7 +54,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => '33578e26cef1261ccc3d63355db4c4ddaf6adbbb',
+      'reference' => '15654bb9ea619b291e841a571de25eb95150247e',
     ),
     'cakephp/bake' => 
     array (

@@ -43,7 +43,7 @@ class DebugTimer
         if (!$name) {
             $named = false;
             $calledFrom = debug_backtrace();
-            $name = Debugger::trimPath($calledFrom[0]['file']) . ' line ' . $calledFrom[0]['line'];
+            $_name = $name = Debugger::trimpath($calledFrom[0]['file']) . ' line ' . $calledFrom[0]['line'];
         } else {
             $named = true;
         }
@@ -66,9 +66,8 @@ class DebugTimer
         self::$_timers[$name] = [
             'start' => $start,
             'message' => $message,
-            'named' => $named,
+            'named' => $named
         ];
-
         return true;
     }
 
@@ -108,7 +107,6 @@ class DebugTimer
             return false;
         }
         self::$_timers[$name]['end'] = $end;
-
         return true;
     }
 
@@ -136,7 +134,7 @@ class DebugTimer
             'start' => 0,
             'end' => $_end - $start,
             'time' => round($_end - $start, 6),
-            'named' => null,
+            'named' => null
         ];
         foreach (self::$_timers as $name => $timer) {
             if (!isset($timer['end'])) {
@@ -145,13 +143,12 @@ class DebugTimer
             $times[$name] = array_merge($timer, [
                 'start' => $timer['start'] - $start,
                 'end' => $timer['end'] - $start,
-                'time' => self::elapsedTime($name),
+                'time' => self::elapsedTime($name)
             ]);
         }
         if ($clear) {
             self::$_timers = [];
         }
-
         return $times;
     }
 
@@ -163,7 +160,6 @@ class DebugTimer
     public static function clear()
     {
         self::$_timers = [];
-
         return true;
     }
 
@@ -179,7 +175,6 @@ class DebugTimer
         if (!isset(self::$_timers[$name]['start']) || !isset(self::$_timers[$name]['end'])) {
             return 0;
         }
-
         return round(self::$_timers[$name]['end'] - self::$_timers[$name]['start'], $precision);
     }
 
@@ -192,7 +187,6 @@ class DebugTimer
     {
         $start = self::requestStartTime();
         $now = microtime(true);
-
         return ($now - $start);
     }
 
@@ -210,7 +204,6 @@ class DebugTimer
         } else {
             $startTime = env('REQUEST_TIME');
         }
-
         return $startTime;
     }
 }

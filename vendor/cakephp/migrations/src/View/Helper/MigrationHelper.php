@@ -122,7 +122,7 @@ class MigrationHelper extends Helper
             return $this->schemas[$table->name()] = $table;
         }
 
-        $collection = $this->getConfig('collection');
+        $collection = $this->config('collection');
         $schema = $collection->describe($table);
         $this->schemas[$table] = $schema;
 
@@ -170,7 +170,7 @@ class MigrationHelper extends Helper
         $indexes = [];
         if (!empty($tableIndexes)) {
             foreach ($tableIndexes as $name) {
-                $indexes[$name] = $tableSchema->getIndex($name);
+                $indexes[$name] = $tableSchema->index($name);
             }
         }
 
@@ -201,31 +201,16 @@ class MigrationHelper extends Helper
         }
         if (!empty($tableConstraints)) {
             foreach ($tableConstraints as $name) {
-                $constraint = $tableSchema->getConstraint($name);
+                $constraint = $tableSchema->constraint($name);
                 if (isset($constraint['update'])) {
-                    $constraint['update'] = $this->formatConstraintAction($constraint['update']);
-                    $constraint['delete'] = $this->formatConstraintAction($constraint['delete']);
+                    $constraint['update'] = strtoupper(Inflector::underscore($constraint['update']));
+                    $constraint['delete'] = strtoupper(Inflector::underscore($constraint['delete']));
                 }
                 $constraints[$name] = $constraint;
             }
         }
 
         return $constraints;
-    }
-
-    /**
-     * Format a constraint action if it is not already in the format expected by Phinx
-     *
-     * @param string $constraint Constraint action name
-     * @return string Constraint action name altered if needed.
-     */
-    public function formatConstraintAction($constraint)
-    {
-        if (defined('\Phinx\Db\Table\ForeignKey::' . $constraint)) {
-            return $constraint;
-        }
-
-        return strtoupper(Inflector::underscore($constraint));
     }
 
     /**
@@ -247,7 +232,6 @@ class MigrationHelper extends Helper
                 $primaryKeys[] = ['name' => $column, 'info' => $this->column($tableSchema, $column)];
             }
         }
-
         return $primaryKeys;
     }
 
@@ -268,7 +252,7 @@ class MigrationHelper extends Helper
             $tablePrimaryKeys = $tableSchema->primaryKey();
 
             foreach ($tablePrimaryKeys as $primaryKey) {
-                $column = $tableSchema->getColumn($primaryKey);
+                $column = $tableSchema->column($primaryKey);
                 if (isset($column['unsigned']) && $column['unsigned'] === true) {
                     return true;
                 }
@@ -289,7 +273,6 @@ class MigrationHelper extends Helper
         $primaryKeys = $this->primaryKeys($table);
         $primaryKeysColumns = Hash::extract($primaryKeys, '{n}.name');
         sort($primaryKeysColumns);
-
         return $primaryKeysColumns;
     }
 
@@ -303,19 +286,11 @@ class MigrationHelper extends Helper
     public function column($tableSchema, $column)
     {
         return [
-            'columnType' => $tableSchema->getColumnType($column),
+            'columnType' => $tableSchema->columnType($column),
             'options' => $this->attributes($tableSchema, $column),
         ];
     }
 
-    /**
-     * Compute the final array of options to display in a `addColumn` or `changeColumn` instruction.
-     * The method also takes care of translating properties names between CakePHP database layer and phinx database
-     * layer.
-     *
-     * @param array $options Array of options to compute the final list from.
-     * @return array
-     */
     public function getColumnOption($options)
     {
         $wantedOptions = array_flip([
@@ -326,8 +301,7 @@ class MigrationHelper extends Helper
             'null',
             'comment',
             'autoIncrement',
-            'precision',
-            'after'
+            'precision'
         ]);
         $columnOptions = array_intersect_key($options, $wantedOptions);
         if (empty($columnOptions['comment'])) {
@@ -344,15 +318,8 @@ class MigrationHelper extends Helper
         } else {
             // due to Phinx using different naming for the precision and scale to CakePHP
             $columnOptions['scale'] = $columnOptions['precision'];
-
-            if (isset($columnOptions['limit'])) {
-                $columnOptions['precision'] = $columnOptions['limit'];
-                unset($columnOptions['limit']);
-            }
-            if (isset($columnOptions['length'])) {
-                $columnOptions['precision'] = $columnOptions['length'];
-                unset($columnOptions['length']);
-            }
+            $columnOptions['precision'] = $columnOptions['limit'];
+            unset($columnOptions['limit']);
         }
 
         return $columnOptions;
@@ -362,10 +329,9 @@ class MigrationHelper extends Helper
      * Returns a string-like representation of a value
      *
      * @param string $value A value to represent as a string
-     * @param bool $numbersAsString Set tu true to return as string.
      * @return mixed
      */
-    public function value($value, $numbersAsString = false)
+    public function value($value)
     {
         if ($value === null || $value === 'null' || $value === 'NULL') {
             return 'null';
@@ -379,7 +345,7 @@ class MigrationHelper extends Helper
             return $value ? 'true' : 'false';
         }
 
-        if (!$numbersAsString && (is_numeric($value) || ctype_digit($value))) {
+        if (is_numeric($value) || ctype_digit($value)) {
             return (float)$value;
         }
 
@@ -410,7 +376,7 @@ class MigrationHelper extends Helper
         ];
 
         $attributes = [];
-        $options = $tableSchema->getColumn($column);
+        $options = $tableSchema->column($column);
         foreach ($options as $_option => $value) {
             $option = $_option;
             switch ($_option) {
@@ -434,7 +400,6 @@ class MigrationHelper extends Helper
         }
 
         ksort($attributes);
-
         return $attributes;
     }
 
@@ -463,7 +428,7 @@ class MigrationHelper extends Helper
                 ]);
                 $v = sprintf('[%s]', $v);
             } else {
-                $v = $this->value($v, $k === 'default');
+                $v = $this->value($v);
             }
             if (!is_numeric($k)) {
                 $v = "'$k' => $v";
@@ -486,7 +451,7 @@ class MigrationHelper extends Helper
      * Returns a $this->table() statement only if it was not issued already
      *
      * @param string $table Table for which the statement is needed
-     * @param bool $reset Reset previously set statement.
+     * @param bool $reset
      * @return string
      */
     public function tableStatement($table, $reset = false)
@@ -497,7 +462,6 @@ class MigrationHelper extends Helper
 
         if (!isset($this->tableStatements[$table])) {
             $this->tableStatements[$table] = true;
-
             return '$this->table(\'' . $table . '\')';
         }
 

@@ -1,20 +1,19 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- * @link          https://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * @link          http://cakephp.org CakePHP(tm) Project
  * @since         1.2.0
- * @license       https://opensource.org/licenses/mit-license.php MIT License
+ * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\Network;
 
-use Cake\Core\Exception\Exception as CakeException;
 use Cake\Core\InstanceConfigTrait;
 use Cake\Network\Exception\SocketException;
 use Cake\Validation\Validation;
@@ -25,9 +24,11 @@ use InvalidArgumentException;
  * CakePHP network socket connection class.
  *
  * Core base class for network communication.
+ *
  */
 class Socket
 {
+
     use InstanceConfigTrait;
 
     /**
@@ -47,15 +48,15 @@ class Socket
         'host' => 'localhost',
         'protocol' => 'tcp',
         'port' => 80,
-        'timeout' => 30,
+        'timeout' => 30
     ];
 
     /**
      * Reference to socket connection resource
      *
-     * @var resource|null
+     * @var resource
      */
-    public $connection;
+    public $connection = null;
 
     /**
      * This boolean contains the current state of the Socket class
@@ -81,31 +82,18 @@ class Socket
     /**
      * Contains all the encryption methods available
      *
-     * SSLv2 and SSLv3 are deprecated, and should not be used as they
-     * have several published vulnerablilities.
-     *
      * @var array
      */
     protected $_encryptMethods = [
         // @codingStandardsIgnoreStart
-        // @deprecated Will be removed in 4.0.0
         'sslv2_client' => STREAM_CRYPTO_METHOD_SSLv2_CLIENT,
-        // @deprecated Will be removed in 4.0.0
         'sslv3_client' => STREAM_CRYPTO_METHOD_SSLv3_CLIENT,
         'sslv23_client' => STREAM_CRYPTO_METHOD_SSLv23_CLIENT,
         'tls_client' => STREAM_CRYPTO_METHOD_TLS_CLIENT,
-        'tlsv10_client' => STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT,
-        'tlsv11_client' => STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT,
-        'tlsv12_client' => STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT,
-        // @deprecated Will be removed in 4.0.0
         'sslv2_server' => STREAM_CRYPTO_METHOD_SSLv2_SERVER,
-        // @deprecated Will be removed in 4.0.0
         'sslv3_server' => STREAM_CRYPTO_METHOD_SSLv3_SERVER,
         'sslv23_server' => STREAM_CRYPTO_METHOD_SSLv23_SERVER,
-        'tls_server' => STREAM_CRYPTO_METHOD_TLS_SERVER,
-        'tlsv10_server' => STREAM_CRYPTO_METHOD_TLSv1_0_SERVER,
-        'tlsv11_server' => STREAM_CRYPTO_METHOD_TLSv1_1_SERVER,
-        'tlsv12_server' => STREAM_CRYPTO_METHOD_TLSv1_2_SERVER
+        'tls_server' => STREAM_CRYPTO_METHOD_TLS_SERVER
         // @codingStandardsIgnoreEnd
     ];
 
@@ -125,7 +113,7 @@ class Socket
      */
     public function __construct(array $config = [])
     {
-        $this->setConfig($config);
+        $this->config($config);
     }
 
     /**
@@ -162,14 +150,8 @@ class Socket
         }
 
         set_error_handler([$this, '_connectionErrorHandler']);
-        $remoteSocketTarget = $scheme . $this->_config['host'];
-        $port = (int)$this->_config['port'];
-        if ($port > 0) {
-            $remoteSocketTarget .= ':' . $port;
-        }
-
-        $this->connection = $this->_getStreamSocketClient(
-            $remoteSocketTarget,
+        $this->connection = stream_socket_client(
+            $scheme . $this->_config['host'] . ':' . $this->_config['port'],
             $errNum,
             $errStr,
             $this->_config['timeout'],
@@ -192,31 +174,7 @@ class Socket
         if ($this->connected) {
             stream_set_timeout($this->connection, $this->_config['timeout']);
         }
-
         return $this->connected;
-    }
-
-    /**
-     * Create a stream socket client. Mock utility.
-     *
-     * @param string $remoteSocketTarget remote socket
-     * @param int $errNum error number
-     * @param string $errStr error string
-     * @param int $timeout timeout
-     * @param int $connectAs flags
-     * @param resource $context context
-     * @return bool|resource
-     */
-    protected function _getStreamSocketClient($remoteSocketTarget, &$errNum, &$errStr, $timeout, $connectAs, $context)
-    {
-        return stream_socket_client(
-            $remoteSocketTarget,
-            $errNum,
-            $errStr,
-            $timeout,
-            $connectAs,
-            $context
-        );
     }
 
     /**
@@ -240,8 +198,14 @@ class Socket
         if (!isset($this->_config['context']['ssl']['SNI_enabled'])) {
             $this->_config['context']['ssl']['SNI_enabled'] = true;
         }
-        if (empty($this->_config['context']['ssl']['peer_name'])) {
-            $this->_config['context']['ssl']['peer_name'] = $host;
+        if (version_compare(PHP_VERSION, '5.6.0', '>=')) {
+            if (empty($this->_config['context']['ssl']['peer_name'])) {
+                $this->_config['context']['ssl']['peer_name'] = $host;
+            }
+        } else {
+            if (empty($this->_config['context']['ssl']['SNI_server_name'])) {
+                $this->_config['context']['ssl']['SNI_server_name'] = $host;
+            }
         }
         if (empty($this->_config['context']['ssl']['cafile'])) {
             $dir = dirname(dirname(__DIR__));
@@ -272,14 +236,13 @@ class Socket
     /**
      * Get the connection context.
      *
-     * @return array|null Null when there is no connection, an array when there is.
+     * @return null|array Null when there is no connection, an array when there is.
      */
     public function context()
     {
         if (!$this->connection) {
             return null;
         }
-
         return stream_context_get_options($this->connection);
     }
 
@@ -293,7 +256,6 @@ class Socket
         if (Validation::ip($this->_config['host'])) {
             return gethostbyaddr($this->_config['host']);
         }
-
         return gethostbyaddr($this->address());
     }
 
@@ -307,7 +269,6 @@ class Socket
         if (Validation::ip($this->_config['host'])) {
             return $this->_config['host'];
         }
-
         return gethostbyname($this->_config['host']);
     }
 
@@ -321,7 +282,6 @@ class Socket
         if (Validation::ip($this->_config['host'])) {
             return [$this->_config['host']];
         }
-
         return gethostbynamel($this->_config['host']);
     }
 
@@ -335,7 +295,6 @@ class Socket
         if (!empty($this->lastError)) {
             return $this->lastError['num'] . ': ' . $this->lastError['str'];
         }
-
         return null;
     }
 
@@ -354,27 +313,23 @@ class Socket
     /**
      * Write data to the socket.
      *
-     * The bool false return value is deprecated and will be int 0 in the next major.
-     * Please code respectively to be future proof.
-     *
-     * @param string $data The data to write to the socket.
-     * @return int|false Bytes written.
+     * @param string $data The data to write to the socket
+     * @return bool Success
      */
     public function write($data)
     {
-        if (!$this->connected && !$this->connect()) {
-            return false;
+        if (!$this->connected) {
+            if (!$this->connect()) {
+                return false;
+            }
         }
         $totalBytes = strlen($data);
-        $written = 0;
-        while ($written < $totalBytes) {
+        for ($written = 0; $written < $totalBytes; $written += $rv) {
             $rv = fwrite($this->connection, substr($data, $written));
             if ($rv === false || $rv === 0) {
                 return $written;
             }
-            $written += $rv;
         }
-
         return $written;
     }
 
@@ -382,16 +337,15 @@ class Socket
      * Read data from the socket. Returns false if no data is available or no connection could be
      * established.
      *
-     * The bool false return value is deprecated and will be null in the next major.
-     * Please code respectively to be future proof.
-     *
      * @param int $length Optional buffer length to read; defaults to 1024
      * @return mixed Socket data
      */
     public function read($length = 1024)
     {
-        if (!$this->connected && !$this->connect()) {
-            return false;
+        if (!$this->connected) {
+            if (!$this->connect()) {
+                return false;
+            }
         }
 
         if (!feof($this->connection)) {
@@ -399,13 +353,10 @@ class Socket
             $info = stream_get_meta_data($this->connection);
             if ($info['timed_out']) {
                 $this->setLastError(E_WARNING, 'Connection timed out');
-
                 return false;
             }
-
             return $buffer;
         }
-
         return false;
     }
 
@@ -418,7 +369,6 @@ class Socket
     {
         if (!is_resource($this->connection)) {
             $this->connected = false;
-
             return true;
         }
         $this->connected = !fclose($this->connection);
@@ -426,7 +376,6 @@ class Socket
         if (!$this->connected) {
             $this->connection = null;
         }
-
         return !$this->connected;
     }
 
@@ -457,7 +406,6 @@ class Socket
         foreach ($state as $property => $value) {
             $this->{$property} = $value;
         }
-
         return true;
     }
 
@@ -477,37 +425,14 @@ class Socket
         if (!array_key_exists($type . '_' . $clientOrServer, $this->_encryptMethods)) {
             throw new InvalidArgumentException('Invalid encryption scheme chosen');
         }
-        $method = $this->_encryptMethods[$type . '_' . $clientOrServer];
-
-        // Prior to PHP 5.6.7 TLS_CLIENT was any version of TLS. This was changed in 5.6.7
-        // to fix backwards compatibility issues, and now only resolves to TLS1.0
-        //
-        // See https://github.com/php/php-src/commit/10bc5fd4c4c8e1dd57bd911b086e9872a56300a0
-        if (version_compare(PHP_VERSION, '5.6.7', '>=')) {
-            if ($method == STREAM_CRYPTO_METHOD_TLS_CLIENT) {
-                // @codingStandardsIgnoreStart
-                $method |= STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT | STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT;
-                // @codingStandardsIgnoreEnd
-            }
-            if ($method == STREAM_CRYPTO_METHOD_TLS_SERVER) {
-                // @codingStandardsIgnoreStart
-                $method |= STREAM_CRYPTO_METHOD_TLSv1_1_SERVER | STREAM_CRYPTO_METHOD_TLSv1_2_SERVER;
-                // @codingStandardsIgnoreEnd
-            }
-        }
-
         try {
-            if ($this->connection === null) {
-                throw new CakeException('You must call connect() first.');
-            }
-            $enableCryptoResult = stream_socket_enable_crypto($this->connection, $enable, $method);
+            $enableCryptoResult = stream_socket_enable_crypto($this->connection, $enable, $this->_encryptMethods[$type . '_' . $clientOrServer]);
         } catch (Exception $e) {
             $this->setLastError(null, $e->getMessage());
-            throw new SocketException($e->getMessage(), null, $e);
+            throw new SocketException($e->getMessage());
         }
         if ($enableCryptoResult === true) {
             $this->encrypted = $enable;
-
             return true;
         }
         $errorMessage = 'Unable to perform enableCrypto operation on the current socket';

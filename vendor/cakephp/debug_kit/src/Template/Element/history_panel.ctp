@@ -11,12 +11,7 @@
  * @since         DebugKit 1.1
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-
-/**
- * @var \DebugKit\View\AjaxView $this
- * @var \DebugKit\Model\Entity\Panel $panel
- * @var array $requests
- */
+use Cake\Routing\Router;
 ?>
 <div id="request-history">
 <?php if (empty($requests)): ?>
@@ -123,8 +118,7 @@ $(document).ready(function() {
 
             for (var i = 0, len = response.panels.length; i < len; i++) {
                 var panel = response.panels[i];
-                // Offset by two for scroll buttons
-                var button = panelButtons.eq(i + 2);
+                var button = panelButtons.eq(i);
                 var summary = button.find('.panel-summary');
 
                 // Don't overwrite the history panel.

@@ -21,9 +21,6 @@ use Cake\ORM\TableRegistry;
 /**
  * Task class for creating and updating controller files.
  *
- * @property \Bake\Shell\Task\ModelTask $Model
- * @property \Bake\Shell\Task\BakeTemplateTask $BakeTemplate
- * @property \Bake\Shell\Task\TestTask $Test
  */
 class ControllerTask extends BakeTask
 {
@@ -35,7 +32,7 @@ class ControllerTask extends BakeTask
     public $tasks = [
         'Bake.Model',
         'Bake.BakeTemplate',
-        'Bake.Test',
+        'Bake.Test'
     ];
 
     /**
@@ -49,7 +46,7 @@ class ControllerTask extends BakeTask
      * Execution method always used for tasks
      *
      * @param string|null $name The name of the controller to bake.
-     * @return null|bool
+     * @return void
      */
     public function main($name = null)
     {
@@ -61,7 +58,6 @@ class ControllerTask extends BakeTask
             foreach ($this->listAll() as $table) {
                 $this->out('- ' . $this->_camelize($table));
             }
-
             return true;
         }
 
@@ -78,7 +74,7 @@ class ControllerTask extends BakeTask
     {
         $tables = $this->listAll();
         foreach ($tables as $table) {
-            TableRegistry::getTableLocator()->clear();
+            TableRegistry::clear();
             $this->main($table);
         }
     }
@@ -121,11 +117,11 @@ class ControllerTask extends BakeTask
             $plugin .= '.';
         }
 
-        if (TableRegistry::getTableLocator()->exists($plugin . $currentModelName)) {
-            $modelObj = TableRegistry::getTableLocator()->get($plugin . $currentModelName);
+        if (TableRegistry::exists($plugin . $currentModelName)) {
+            $modelObj = TableRegistry::get($plugin . $currentModelName);
         } else {
-            $modelObj = TableRegistry::getTableLocator()->get($plugin . $currentModelName, [
-                'connectionName' => $this->connection,
+            $modelObj = TableRegistry::get($plugin . $currentModelName, [
+                'connectionName' => $this->connection
             ]);
         }
 
@@ -134,18 +130,11 @@ class ControllerTask extends BakeTask
         $singularHumanName = $this->_singularHumanName($controllerName);
         $pluralHumanName = $this->_variableName($controllerName);
 
-        $defaultModel = sprintf('%s\Model\Table\%sTable', $namespace, $controllerName);
-        if (!class_exists($defaultModel)) {
-            $defaultModel = null;
-        }
-        $entityClassName = $this->_entityName($modelObj->getAlias());
-
         $data = compact(
             'actions',
+            'admin',
             'components',
             'currentModelName',
-            'defaultModel',
-            'entityClassName',
             'helpers',
             'modelObj',
             'namespace',
@@ -160,7 +149,6 @@ class ControllerTask extends BakeTask
 
         $out = $this->bakeController($controllerName, $data);
         $this->bakeTest($controllerName);
-
         return $out;
     }
 
@@ -191,7 +179,6 @@ class ControllerTask extends BakeTask
         $path = $this->getPath();
         $filename = $path . $controllerName . 'Controller.php';
         $this->createFile($filename, $contents);
-
         return $contents;
     }
 
@@ -199,17 +186,19 @@ class ControllerTask extends BakeTask
      * Assembles and writes a unit test file
      *
      * @param string $className Controller class name
-     * @return string|false Baked test
+     * @return string Baked test
      */
     public function bakeTest($className)
     {
         if (!empty($this->params['no-test'])) {
-            return false;
+            return;
         }
         $this->Test->plugin = $this->plugin;
         $this->Test->connection = $this->connection;
-        $this->Test->interactive = $this->interactive;
-
+        $prefix = $this->_getPrefix();
+        if ($prefix) {
+            $className = str_replace('/', '\\', $prefix) . '\\' . $className;
+        }
         return $this->Test->bake('Controller', $className);
     }
 
@@ -225,7 +214,6 @@ class ControllerTask extends BakeTask
             $components = explode(',', $this->params['components']);
             $components = array_values(array_filter(array_map('trim', $components)));
         }
-
         return $components;
     }
 
@@ -241,7 +229,6 @@ class ControllerTask extends BakeTask
             $helpers = explode(',', $this->params['helpers']);
             $helpers = array_values(array_filter(array_map('trim', $helpers)));
         }
-
         return $helpers;
     }
 
@@ -253,7 +240,6 @@ class ControllerTask extends BakeTask
     public function listAll()
     {
         $this->Model->connection = $this->connection;
-
         return $this->Model->listUnskipped();
     }
 
@@ -265,28 +251,27 @@ class ControllerTask extends BakeTask
     public function getOptionParser()
     {
         $parser = parent::getOptionParser();
-        $parser->setDescription(
+        $parser->description(
             'Bake a controller skeleton.'
         )->addArgument('name', [
-            'help' => 'Name of the controller to bake (without the `Controller` suffix). ' .
-                'You can use Plugin.name to bake controllers into plugins.',
+            'help' => 'Name of the controller to bake. Can use Plugin.name to bake controllers into plugins.'
         ])->addOption('components', [
-            'help' => 'The comma separated list of components to use.',
+            'help' => 'The comma separated list of components to use.'
         ])->addOption('helpers', [
-            'help' => 'The comma separated list of helpers to use.',
+            'help' => 'The comma separated list of helpers to use.'
         ])->addOption('prefix', [
-            'help' => 'The namespace/routing prefix to use.',
+            'help' => 'The namespace/routing prefix to use.'
         ])->addOption('actions', [
             'help' => 'The comma separated list of actions to generate. ' .
-                      'You can include custom methods provided by your template set here.',
+                      'You can include custom methods provided by your template set here.'
         ])->addOption('no-test', [
             'boolean' => true,
-            'help' => 'Do not generate a test skeleton.',
+            'help' => 'Do not generate a test skeleton.'
         ])->addOption('no-actions', [
             'boolean' => true,
-            'help' => 'Do not generate basic CRUD action methods.',
+            'help' => 'Do not generate basic CRUD action methods.'
         ])->addSubcommand('all', [
-            'help' => 'Bake all controllers with CRUD methods.',
+            'help' => 'Bake all controllers with CRUD methods.'
         ]);
 
         return $parser;

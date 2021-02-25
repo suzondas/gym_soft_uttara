@@ -12,7 +12,6 @@
 namespace Migrations;
 
 use Phinx\Migration\Manager;
-use Symfony\Component\Console\Input\InputInterface;
 
 /**
  * Overrides Phinx Manager class in order to provide an interface
@@ -22,13 +21,6 @@ class CakeManager extends Manager
 {
 
     public $maxNameLength = 0;
-
-    /**
-     * Instance of InputInterface the Manager is dealing with for the current shell call
-     *
-     * @var \Symfony\Component\Console\Input\InputInterface
-     */
-    protected $input;
 
     /**
      * Reset the migrations stored in the object
@@ -53,9 +45,9 @@ class CakeManager extends Manager
     /**
      * Prints the specified environment's migration status.
      *
-     * @param string $environment Environment name.
-     * @param null|string $format Format (`json` or `array`).
-     * @return array|string Array of migrations or json string.
+     * @param string $environment
+     * @param null|string $format
+     * @return array Array of migrations
      */
     public function printStatus($environment, $format = null)
     {
@@ -132,7 +124,6 @@ class CakeManager extends Manager
             $this->getOutput()->writeln(
                 'No migrations to run'
             );
-
             return;
         }
 
@@ -145,7 +136,7 @@ class CakeManager extends Manager
     /**
      * {@inheritdoc}
      */
-    public function rollbackToDateTime($environment, \DateTime $dateTime, $force = false)
+    public function rollbackToDateTime($environment, \DateTime $dateTime)
     {
         $env = $this->getEnvironment($environment);
         $versions = $env->getVersions();
@@ -153,20 +144,17 @@ class CakeManager extends Manager
         sort($versions);
         $versions = array_reverse($versions);
 
-        if (empty($versions) || $dateString > $versions[0]) {
+        if ($dateString > $versions[0]) {
             $this->getOutput()->writeln('No migrations to rollback');
-
             return;
         }
 
         if ($dateString < end($versions)) {
             $this->getOutput()->writeln('Rolling back all migrations');
             $this->rollback($environment, 0);
-
             return;
         }
 
-        $index = 0;
         foreach ($versions as $index => $version) {
             if ($dateString > $version) {
                 break;
@@ -176,7 +164,7 @@ class CakeManager extends Manager
         $versionToRollback = $versions[$index];
 
         $this->getOutput()->writeln('Rolling back to version ' . $versionToRollback);
-        $this->rollback($environment, $versionToRollback, $force);
+        $this->rollback($environment, $versionToRollback);
     }
 
     /**
@@ -220,7 +208,6 @@ class CakeManager extends Manager
         $time = date('Y-m-d H:i:s', time());
 
         $adapter->migrated($Migration, 'up', $time, $time);
-
         return true;
     }
 
@@ -282,7 +269,6 @@ class CakeManager extends Manager
 
         if (empty($versions)) {
             $output->writeln('<info>No migrations were found. Nothing to mark as migrated.</info>');
-
             return;
         }
 
@@ -308,7 +294,6 @@ class CakeManager extends Manager
                     )
                 );
                 $output->writeln('<error>All marked migrations during this process were unmarked.</error>');
-
                 return;
             }
         }
@@ -332,39 +317,5 @@ class CakeManager extends Manager
         }
 
         return $class;
-    }
-
-    /**
-     * Sets the InputInterface the Manager is dealing with for the current shell call
-     *
-     * @param \Symfony\Component\Console\Input\InputInterface $input Instance of InputInterface
-     * @return void
-     */
-    public function setInput(InputInterface $input)
-    {
-        $this->input = $input;
-    }
-
-    /**
-     * Overload the basic behavior to add an instance of the InputInterface the shell call is
-     * using in order to gives the ability to the AbstractSeed::call() method to propagate options
-     * to the other MigrationsDispatcher it is generating.
-     *
-     * {@inheritdoc}
-     */
-    public function getSeeds()
-    {
-        parent::getSeeds();
-        if (empty($this->seeds)) {
-            return $this->seeds;
-        }
-
-        foreach ($this->seeds as $class => $instance) {
-            if ($instance instanceof AbstractSeed) {
-                $instance->setInput($this->input);
-            }
-        }
-
-        return $this->seeds;
     }
 }

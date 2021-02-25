@@ -20,9 +20,11 @@ use Exception;
 
 /**
  * Utility class to filter Model Table associations
+ *
  */
 class AssociationFilter
 {
+
     /**
      * Detect existing belongsToMany associations and cleanup the hasMany aliases based on existing
      * belongsToMany associations provided
@@ -34,7 +36,6 @@ class AssociationFilter
     public function filterHasManyAssociationsAliases(Table $table, array $aliases)
     {
         $belongsToManyJunctionsAliases = $this->belongsToManyJunctionAliases($table);
-
         return array_values(array_diff($aliases, $belongsToManyJunctionsAliases));
     }
 
@@ -47,10 +48,9 @@ class AssociationFilter
     public function belongsToManyJunctionAliases(Table $table)
     {
         $extractor = function ($val) {
-            return $val->junction()->getAlias();
+            return $val->junction()->alias();
         };
-
-        return array_map($extractor, $table->associations()->getByType('BelongsToMany'));
+        return array_map($extractor, $table->associations()->type('BelongsToMany'));
     }
 
     /**
@@ -67,10 +67,10 @@ class AssociationFilter
         $associations = [];
 
         foreach ($keys as $type) {
-            foreach ($model->associations()->getByType($type) as $assoc) {
-                $target = $assoc->getTarget();
-                $assocName = $assoc->getName();
-                $alias = $target->getAlias();
+            foreach ($model->associations()->type($type) as $assoc) {
+                $target = $assoc->target();
+                $assocName = $assoc->name();
+                $alias = $target->alias();
                 //filter existing HasMany
                 if ($type === 'HasMany' && in_array($alias, $belongsToManyJunctionsAliases)) {
                     continue;
@@ -80,7 +80,7 @@ class AssociationFilter
 
                 $navLink = true;
                 $modelClass = get_class($model);
-                if ($modelClass !== Table::class && $targetClass === $modelClass) {
+                if ($modelClass !== 'Cake\ORM\Table' && $targetClass === $modelClass) {
                     $navLink = false;
                 }
 
@@ -91,14 +91,14 @@ class AssociationFilter
 
                 try {
                     $associations[$type][$assocName] = [
-                        'property' => $assoc->getProperty(),
+                        'property' => $assoc->property(),
                         'variable' => Inflector::variable($assocName),
-                        'primaryKey' => (array)$target->getPrimaryKey(),
-                        'displayField' => $target->getDisplayField(),
-                        'foreignKey' => $assoc->getForeignKey(),
+                        'primaryKey' => (array)$target->primaryKey(),
+                        'displayField' => $target->displayField(),
+                        'foreignKey' => $assoc->foreignKey(),
                         'alias' => $alias,
                         'controller' => $className,
-                        'fields' => $target->getSchema()->columns(),
+                        'fields' => $target->schema()->columns(),
                         'navLink' => $navLink,
                     ];
                 } catch (Exception $e) {
@@ -106,7 +106,6 @@ class AssociationFilter
                 }
             }
         }
-
         return $associations;
     }
 }

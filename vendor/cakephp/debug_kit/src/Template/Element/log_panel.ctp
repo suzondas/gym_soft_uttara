@@ -11,11 +11,7 @@
  * @since         DebugKit 0.1
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-
-/**
- * @var \DebugKit\View\AjaxView $this
- * @var \DebugKit\Log\Engine\DebugKitLog $logger
- */
+use DebugKit\Log\DebugKitLog;
 ?>
 <?php if ($logger->noLogs()): ?>
     <p class="info"><?= __d('debug_kit', 'There were no log entries made this request') ?></p>

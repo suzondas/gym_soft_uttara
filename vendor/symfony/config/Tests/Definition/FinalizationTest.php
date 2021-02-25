@@ -11,12 +11,11 @@
 
 namespace Symfony\Component\Config\Tests\Definition;
 
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
-use Symfony\Component\Config\Definition\NodeInterface;
 use Symfony\Component\Config\Definition\Processor;
+use Symfony\Component\Config\Definition\NodeInterface;
 
-class FinalizationTest extends TestCase
+class FinalizationTest extends \PHPUnit_Framework_TestCase
 {
     public function testUnsetKeyWithDeepHierarchy()
     {
@@ -42,27 +41,27 @@ class FinalizationTest extends TestCase
             ->buildTree()
         ;
 
-        $a = [
-            'level1' => [
-                'level2' => [
+        $a = array(
+            'level1' => array(
+                'level2' => array(
                     'somevalue' => 'foo',
                     'anothervalue' => 'bar',
-                ],
+                ),
                 'level1_scalar' => 'foo',
-            ],
-        ];
+            ),
+        );
 
-        $b = [
-            'level1' => [
+        $b = array(
+            'level1' => array(
                 'level2' => false,
-            ],
-        ];
+            ),
+        );
 
-        $this->assertEquals([
-            'level1' => [
+        $this->assertEquals(array(
+            'level1' => array(
                 'level1_scalar' => 'foo',
-            ],
-        ], $this->process($tree, [$a, $b]));
+            ),
+        ), $this->process($tree, array($a, $b)));
     }
 
     protected function process(NodeInterface $tree, array $configs)

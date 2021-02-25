@@ -28,7 +28,6 @@
  */
 namespace Phinx\Console\Command;
 
-use Phinx\Util\Util;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -93,25 +92,11 @@ abstract class AbstractCommand extends Command
             $this->loadConfig($input, $output);
         }
 
-        $this->loadManager($input, $output);
-
+        $this->loadManager($output);
         // report the paths
-        $paths = $this->getConfig()->getMigrationPaths();
-
-        $output->writeln('<info>using migration paths</info> ');
-
-        foreach (Util::globAll($paths) as $path) {
-            $output->writeln('<info> - ' . realpath($path) . '</info>');
-        }
-
+        $output->writeln('<info>using migration path</info> ' . $this->getConfig()->getMigrationPath());
         try {
-            $paths = $this->getConfig()->getSeedPaths();
-
-            $output->writeln('<info>using seed paths</info> ');
-
-            foreach (Util::globAll($paths) as $path) {
-                $output->writeln('<info> - ' . realpath($path) . '</info>');
-            }
+            $output->writeln('<info>using seed path</info> ' . $this->getConfig()->getSeedPath());
         } catch (\UnexpectedValueException $e) {
             // do nothing as seeds are optional
         }
@@ -132,7 +117,7 @@ abstract class AbstractCommand extends Command
     /**
      * Gets the config.
      *
-     * @return ConfigInterface
+     * @return Config
      */
     public function getConfig()
     {
@@ -277,26 +262,21 @@ abstract class AbstractCommand extends Command
     /**
      * Load the migrations manager and inject the config
      *
-     * @param InputInterface $input
      * @param OutputInterface $output
+     * @return void
      */
-    protected function loadManager(InputInterface $input, OutputInterface $output)
+    protected function loadManager(OutputInterface $output)
     {
         if (null === $this->getManager()) {
-            $manager = new Manager($this->getConfig(), $input, $output);
+            $manager = new Manager($this->getConfig(), $output);
             $this->setManager($manager);
-        } else {
-            $manager = $this->getManager();
-            $manager->setInput($input);
-            $manager->setOutput($output);
         }
     }
 
     /**
      * Verify that the migration directory exists and is writable.
      *
-     * @param string $path
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      * @return void
      */
     protected function verifyMigrationDirectory($path)
@@ -319,8 +299,7 @@ abstract class AbstractCommand extends Command
     /**
      * Verify that the seed directory exists and is writable.
      *
-     * @param string $path
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      * @return void
      */
     protected function verifySeedDirectory($path)

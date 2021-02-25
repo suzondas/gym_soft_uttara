@@ -18,9 +18,6 @@ use Cake\Utility\Inflector;
 
 /**
  * Mailer code generator.
- *
- * @property \Bake\Shell\Task\BakeTemplateTask $BakeTemplate
- * @property \Bake\Shell\Task\TestTask $Test
  */
 class MailerTask extends SimpleBakeTask
 {
@@ -59,12 +56,11 @@ class MailerTask extends SimpleBakeTask
      * Bake the Mailer class and html/text layout files.
      *
      * @param string $name The name of the mailer to make.
-     * @return string
+     * @return void
      */
     public function bake($name)
     {
         $this->bakeLayouts($name);
-
         return parent::bake($name);
     }
 

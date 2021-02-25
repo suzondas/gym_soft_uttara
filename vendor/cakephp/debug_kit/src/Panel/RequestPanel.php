@@ -14,6 +14,7 @@ namespace DebugKit\Panel;
 
 use Cake\Controller\Controller;
 use Cake\Event\Event;
+use Cake\Routing\Router;
 use DebugKit\DebugPanel;
 
 /**
@@ -22,6 +23,7 @@ use DebugKit\DebugPanel;
  */
 class RequestPanel extends DebugPanel
 {
+
     /**
      * Data collection callback.
      *
@@ -30,16 +32,14 @@ class RequestPanel extends DebugPanel
      */
     public function shutdown(Event $event)
     {
-        /* @var \Cake\Controller\Controller $controller */
-        $controller = $event->getSubject();
-        $request = $controller->getRequest();
+        $controller = $event->subject();
+        $request = $controller->request;
         $this->_data = [
-            'params' => $request->getAttribute("params"),
-            'query' => $request->getQueryParams(),
-            'data' => $request->getData(),
-            'cookie' => $request->getCookieParams(),
+            'params' => $request->params,
+            'query' => $request->query,
+            'data' => $request->data,
+            'cookie' => $request->cookies,
             'get' => $_GET,
-            'matchedRoute' => $request->getParam('_matchedRoute'),
             'headers' => ['response' => headers_sent($file, $line), 'file' => $file, 'line' => $line],
         ];
     }

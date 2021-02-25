@@ -1,38 +1,40 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- * @link          https://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * @link          http://cakephp.org CakePHP(tm) Project
  * @since         3.0.10
- * @license       https://opensource.org/licenses/mit-license.php MIT License
+ * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\Event;
 
 /**
  * Implements Cake\Event\EventDispatcherInterface.
+ *
  */
 trait EventDispatcherTrait
 {
+
     /**
      * Instance of the Cake\Event\EventManager this object is using
      * to dispatch inner events.
      *
-     * @var \Cake\Event\EventManagerInterface|\Cake\Event\EventManager
+     * @var \Cake\Event\EventManager
      */
-    protected $_eventManager;
+    protected $_eventManager = null;
 
     /**
      * Default class name for new event objects.
      *
      * @var string
      */
-    protected $_eventClass = Event::class;
+    protected $_eventClass = '\Cake\Event\Event';
 
     /**
      * Returns the Cake\Event\EventManager manager instance for this object.
@@ -42,52 +44,15 @@ trait EventDispatcherTrait
      *
      * @param \Cake\Event\EventManager|null $eventManager the eventManager to set
      * @return \Cake\Event\EventManager
-     * @deprecated 3.5.0 Use getEventManager()/setEventManager() instead.
      */
     public function eventManager(EventManager $eventManager = null)
     {
-        deprecationWarning(
-            'EventDispatcherTrait::eventManager() is deprecated. ' .
-            'Use EventDispatcherTrait::setEventManager()/getEventManager() instead.'
-        );
         if ($eventManager !== null) {
-            $this->setEventManager($eventManager);
-        }
-
-        return $this->getEventManager();
-    }
-
-    /**
-     * Returns the Cake\Event\EventManager manager instance for this object.
-     *
-     * You can use this instance to register any new listeners or callbacks to the
-     * object events, or create your own events and trigger them at will.
-     *
-     * @return \Cake\Event\EventManager
-     */
-    public function getEventManager()
-    {
-        if ($this->_eventManager === null) {
+            $this->_eventManager = $eventManager;
+        } elseif (empty($this->_eventManager)) {
             $this->_eventManager = new EventManager();
         }
-
         return $this->_eventManager;
-    }
-
-    /**
-     * Returns the Cake\Event\EventManager manager instance for this object.
-     *
-     * You can use this instance to register any new listeners or callbacks to the
-     * object events, or create your own events and trigger them at will.
-     *
-     * @param \Cake\Event\EventManager $eventManager the eventManager to set
-     * @return $this
-     */
-    public function setEventManager(EventManager $eventManager)
-    {
-        $this->_eventManager = $eventManager;
-
-        return $this;
     }
 
     /**
@@ -100,6 +65,7 @@ trait EventDispatcherTrait
      * it can be read by listeners.
      * @param object|null $subject The object that this event applies to
      * ($this by default).
+     *
      * @return \Cake\Event\Event
      */
     public function dispatchEvent($name, $data = null, $subject = null)
@@ -109,7 +75,7 @@ trait EventDispatcherTrait
         }
 
         $event = new $this->_eventClass($name, $subject, $data);
-        $this->getEventManager()->dispatch($event);
+        $this->eventManager()->dispatch($event);
 
         return $event;
     }

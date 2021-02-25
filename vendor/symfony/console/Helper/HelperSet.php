@@ -21,19 +21,18 @@ use Symfony\Component\Console\Exception\InvalidArgumentException;
  */
 class HelperSet implements \IteratorAggregate
 {
-    /**
-     * @var Helper[]
-     */
-    private $helpers = [];
+    private $helpers = array();
     private $command;
 
     /**
-     * @param Helper[] $helpers An array of helper
+     * Constructor.
+     *
+     * @param Helper[] $helpers An array of helper.
      */
-    public function __construct(array $helpers = [])
+    public function __construct(array $helpers = array())
     {
         foreach ($helpers as $alias => $helper) {
-            $this->set($helper, \is_int($alias) ? null : $alias);
+            $this->set($helper, is_int($alias) ? null : $alias);
         }
     }
 
@@ -83,6 +82,11 @@ class HelperSet implements \IteratorAggregate
         return $this->helpers[$name];
     }
 
+    /**
+     * Sets the command associated with this helper set.
+     *
+     * @param Command $command A Command instance
+     */
     public function setCommand(Command $command = null)
     {
         $this->command = $command;
@@ -98,9 +102,6 @@ class HelperSet implements \IteratorAggregate
         return $this->command;
     }
 
-    /**
-     * @return Helper[]
-     */
     public function getIterator()
     {
         return new \ArrayIterator($this->helpers);

@@ -15,12 +15,6 @@ use Cake\ORM\Entity;
 
 /**
  * Panel entity class.
- *
- * @property int $id
- * @property int $request_id
- * @property string $title
- * @property string $element
- * @property string $content
  */
 class Panel extends Entity
 {
@@ -38,7 +32,6 @@ class Panel extends Entity
      * Over certain sizes PDO will return file handles.
      * For backwards compatibility and consistency we smooth over that difference here.
      *
-     * @param mixed $content Content
      * @return string
      */
     protected function _getContent($content)
@@ -46,7 +39,6 @@ class Panel extends Entity
         if (is_resource($content)) {
             return stream_get_contents($content);
         }
-
         return $content;
     }
 }

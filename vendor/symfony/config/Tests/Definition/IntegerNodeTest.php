@@ -11,10 +11,9 @@
 
 namespace Symfony\Component\Config\Tests\Definition;
 
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\IntegerNode;
 
-class IntegerNodeTest extends TestCase
+class IntegerNodeTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @dataProvider getValidValues
@@ -40,36 +39,36 @@ class IntegerNodeTest extends TestCase
 
     public function getValidValues()
     {
-        return [
-            [1798],
-            [-678],
-            [0],
-        ];
+        return array(
+            array(1798),
+            array(-678),
+            array(0),
+        );
     }
 
     /**
      * @dataProvider getInvalidValues
+     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidTypeException
      */
     public function testNormalizeThrowsExceptionOnInvalidValues($value)
     {
-        $this->expectException('Symfony\Component\Config\Definition\Exception\InvalidTypeException');
         $node = new IntegerNode('test');
         $node->normalize($value);
     }
 
     public function getInvalidValues()
     {
-        return [
-            [null],
-            [''],
-            ['foo'],
-            [true],
-            [false],
-            [0.0],
-            [0.1],
-            [[]],
-            [['foo' => 'bar']],
-            [new \stdClass()],
-        ];
+        return array(
+            array(null),
+            array(''),
+            array('foo'),
+            array(true),
+            array(false),
+            array(0.0),
+            array(0.1),
+            array(array()),
+            array(array('foo' => 'bar')),
+            array(new \stdClass()),
+        );
     }
 }

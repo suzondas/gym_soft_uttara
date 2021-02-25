@@ -11,11 +11,10 @@
 
 namespace Symfony\Component\Config\Tests\Definition;
 
-use PHPUnit\Framework\TestCase;
-use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\NodeInterface;
+use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 
-class NormalizationTest extends TestCase
+class NormalizationTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @dataProvider getEncoderTests
@@ -30,7 +29,7 @@ class NormalizationTest extends TestCase
                     ->node('encoders', 'array')
                         ->useAttributeAsKey('class')
                         ->prototype('array')
-                            ->beforeNormalization()->ifString()->then(function ($v) { return ['algorithm' => $v]; })->end()
+                            ->beforeNormalization()->ifString()->then(function ($v) { return array('algorithm' => $v); })->end()
                             ->children()
                                 ->node('algorithm', 'scalar')->end()
                             ->end()
@@ -41,54 +40,54 @@ class NormalizationTest extends TestCase
             ->buildTree()
         ;
 
-        $normalized = [
-            'encoders' => [
-                'foo' => ['algorithm' => 'plaintext'],
-            ],
-        ];
+        $normalized = array(
+            'encoders' => array(
+                'foo' => array('algorithm' => 'plaintext'),
+            ),
+        );
 
         $this->assertNormalized($tree, $denormalized, $normalized);
     }
 
     public function getEncoderTests()
     {
-        $configs = [];
+        $configs = array();
 
         // XML
-        $configs[] = [
-            'encoder' => [
-                ['class' => 'foo', 'algorithm' => 'plaintext'],
-            ],
-        ];
+        $configs[] = array(
+            'encoder' => array(
+                array('class' => 'foo', 'algorithm' => 'plaintext'),
+            ),
+        );
 
         // XML when only one element of this type
-        $configs[] = [
-            'encoder' => ['class' => 'foo', 'algorithm' => 'plaintext'],
-        ];
+        $configs[] = array(
+            'encoder' => array('class' => 'foo', 'algorithm' => 'plaintext'),
+        );
 
         // YAML/PHP
-        $configs[] = [
-            'encoders' => [
-                ['class' => 'foo', 'algorithm' => 'plaintext'],
-            ],
-        ];
+        $configs[] = array(
+            'encoders' => array(
+                array('class' => 'foo', 'algorithm' => 'plaintext'),
+            ),
+        );
 
         // YAML/PHP
-        $configs[] = [
-            'encoders' => [
+        $configs[] = array(
+            'encoders' => array(
                 'foo' => 'plaintext',
-            ],
-        ];
+            ),
+        );
 
         // YAML/PHP
-        $configs[] = [
-            'encoders' => [
-                'foo' => ['algorithm' => 'plaintext'],
-            ],
-        ];
+        $configs[] = array(
+            'encoders' => array(
+                'foo' => array('algorithm' => 'plaintext'),
+            ),
+        );
 
         return array_map(function ($v) {
-            return [$v];
+            return array($v);
         }, $configs);
     }
 
@@ -114,28 +113,28 @@ class NormalizationTest extends TestCase
             ->buildTree()
         ;
 
-        $normalized = ['logout' => ['handlers' => ['a', 'b', 'c']]];
+        $normalized = array('logout' => array('handlers' => array('a', 'b', 'c')));
 
         $this->assertNormalized($tree, $denormalized, $normalized);
     }
 
     public function getAnonymousKeysTests()
     {
-        $configs = [];
+        $configs = array();
 
-        $configs[] = [
-            'logout' => [
-                'handlers' => ['a', 'b', 'c'],
-            ],
-        ];
+        $configs[] = array(
+            'logout' => array(
+                'handlers' => array('a', 'b', 'c'),
+            ),
+        );
 
-        $configs[] = [
-            'logout' => [
-                'handler' => ['a', 'b', 'c'],
-            ],
-        ];
+        $configs[] = array(
+            'logout' => array(
+                'handler' => array('a', 'b', 'c'),
+            ),
+        );
 
-        return array_map(function ($v) { return [$v]; }, $configs);
+        return array_map(function ($v) { return array($v); }, $configs);
     }
 
     /**
@@ -143,43 +142,45 @@ class NormalizationTest extends TestCase
      */
     public function testNumericKeysAsAttributes($denormalized)
     {
-        $normalized = [
-            'thing' => [42 => ['foo', 'bar'], 1337 => ['baz', 'qux']],
-        ];
+        $normalized = array(
+            'thing' => array(42 => array('foo', 'bar'), 1337 => array('baz', 'qux')),
+        );
 
         $this->assertNormalized($this->getNumericKeysTestTree(), $denormalized, $normalized);
     }
 
     public function getNumericKeysTests()
     {
-        $configs = [];
+        $configs = array();
 
-        $configs[] = [
-            'thing' => [
-                42 => ['foo', 'bar'], 1337 => ['baz', 'qux'],
-            ],
-        ];
+        $configs[] = array(
+            'thing' => array(
+                42 => array('foo', 'bar'), 1337 => array('baz', 'qux'),
+            ),
+        );
 
-        $configs[] = [
-            'thing' => [
-                ['foo', 'bar', 'id' => 42], ['baz', 'qux', 'id' => 1337],
-            ],
-        ];
+        $configs[] = array(
+            'thing' => array(
+                array('foo', 'bar', 'id' => 42), array('baz', 'qux', 'id' => 1337),
+            ),
+        );
 
-        return array_map(function ($v) { return [$v]; }, $configs);
+        return array_map(function ($v) { return array($v); }, $configs);
     }
 
+    /**
+     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     * @expectedExceptionMessage The attribute "id" must be set for path "root.thing".
+     */
     public function testNonAssociativeArrayThrowsExceptionIfAttributeNotSet()
     {
-        $this->expectException('Symfony\Component\Config\Definition\Exception\InvalidConfigurationException');
-        $this->expectExceptionMessage('The attribute "id" must be set for path "root.thing".');
-        $denormalized = [
-            'thing' => [
-                ['foo', 'bar'], ['baz', 'qux'],
-            ],
-        ];
+        $denormalized = array(
+            'thing' => array(
+                array('foo', 'bar'), array('baz', 'qux'),
+            ),
+        );
 
-        $this->assertNormalized($this->getNumericKeysTestTree(), $denormalized, []);
+        $this->assertNormalized($this->getNumericKeysTestTree(), $denormalized, array());
     }
 
     public function testAssociativeArrayPreserveKeys()
@@ -196,7 +197,7 @@ class NormalizationTest extends TestCase
             ->buildTree()
         ;
 
-        $data = ['first' => ['foo' => 'bar']];
+        $data = array('first' => array('foo' => 'bar'));
 
         $this->assertNormalized($tree, $data, $data);
     }

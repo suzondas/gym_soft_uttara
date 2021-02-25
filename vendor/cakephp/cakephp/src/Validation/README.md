@@ -26,7 +26,7 @@ $validator
     ->requirePresence('comment')
     ->notEmpty('comment', 'You need to give a comment.');
 
-$errors = $validator->validate($_POST);
+$errors = $validator->errors($_POST);
 if (!empty($errors)) {
     // display errors.
 }
@@ -34,4 +34,4 @@ if (!empty($errors)) {
 
 ## Documentation
 
-Please make sure you check the [official documentation](https://book.cakephp.org/3/en/core-libraries/validation.html)
+Please make sure you check the [official documentation](http://book.cakephp.org/3.0/en/core-libraries/validation.html)

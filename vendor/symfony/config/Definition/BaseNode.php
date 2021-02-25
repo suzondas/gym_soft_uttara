@@ -25,23 +25,24 @@ abstract class BaseNode implements NodeInterface
 {
     protected $name;
     protected $parent;
-    protected $normalizationClosures = [];
-    protected $finalValidationClosures = [];
+    protected $normalizationClosures = array();
+    protected $finalValidationClosures = array();
     protected $allowOverwrite = true;
     protected $required = false;
-    protected $deprecationMessage = null;
-    protected $equivalentValues = [];
-    protected $attributes = [];
+    protected $equivalentValues = array();
+    protected $attributes = array();
 
     /**
-     * @param string|null        $name   The name of the node
-     * @param NodeInterface|null $parent The parent of this node
+     * Constructor.
      *
-     * @throws \InvalidArgumentException if the name contains a period
+     * @param string        $name   The name of the node
+     * @param NodeInterface $parent The parent of this node
+     *
+     * @throws \InvalidArgumentException if the name contains a period.
      */
     public function __construct($name, NodeInterface $parent = null)
     {
-        if (false !== strpos($name = (string) $name, '.')) {
+        if (false !== strpos($name, '.')) {
             throw new \InvalidArgumentException('The name must not contain ".".');
         }
 
@@ -49,37 +50,21 @@ abstract class BaseNode implements NodeInterface
         $this->parent = $parent;
     }
 
-    /**
-     * @param string $key
-     */
     public function setAttribute($key, $value)
     {
         $this->attributes[$key] = $value;
     }
 
-    /**
-     * @param string $key
-     *
-     * @return mixed
-     */
     public function getAttribute($key, $default = null)
     {
         return isset($this->attributes[$key]) ? $this->attributes[$key] : $default;
     }
 
-    /**
-     * @param string $key
-     *
-     * @return bool
-     */
     public function hasAttribute($key)
     {
         return isset($this->attributes[$key]);
     }
 
-    /**
-     * @return array
-     */
     public function getAttributes()
     {
         return $this->attributes;
@@ -90,9 +75,6 @@ abstract class BaseNode implements NodeInterface
         $this->attributes = $attributes;
     }
 
-    /**
-     * @param string $key
-     */
     public function removeAttribute($key)
     {
         unset($this->attributes[$key]);
@@ -111,7 +93,7 @@ abstract class BaseNode implements NodeInterface
     /**
      * Returns info message.
      *
-     * @return string|null The info text
+     * @return string The info text
      */
     public function getInfo()
     {
@@ -131,7 +113,7 @@ abstract class BaseNode implements NodeInterface
     /**
      * Retrieves the example configuration for this node.
      *
-     * @return string|array|null The example
+     * @return string|array The example
      */
     public function getExample()
     {
@@ -146,7 +128,7 @@ abstract class BaseNode implements NodeInterface
      */
     public function addEquivalentValue($originalValue, $equivalentValue)
     {
-        $this->equivalentValues[] = [$originalValue, $equivalentValue];
+        $this->equivalentValues[] = array($originalValue, $equivalentValue);
     }
 
     /**
@@ -157,19 +139,6 @@ abstract class BaseNode implements NodeInterface
     public function setRequired($boolean)
     {
         $this->required = (bool) $boolean;
-    }
-
-    /**
-     * Sets this node as deprecated.
-     *
-     * You can use %node% and %path% placeholders in your message to display,
-     * respectively, the node name and its complete path.
-     *
-     * @param string|null $message Deprecated message
-     */
-    public function setDeprecated($message)
-    {
-        $this->deprecationMessage = $message;
     }
 
     /**
@@ -203,7 +172,9 @@ abstract class BaseNode implements NodeInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Checks if this node is required.
+     *
+     * @return bool
      */
     public function isRequired()
     {
@@ -211,30 +182,9 @@ abstract class BaseNode implements NodeInterface
     }
 
     /**
-     * Checks if this node is deprecated.
+     * Returns the name of this node.
      *
-     * @return bool
-     */
-    public function isDeprecated()
-    {
-        return null !== $this->deprecationMessage;
-    }
-
-    /**
-     * Returns the deprecated message.
-     *
-     * @param string $node the configuration node name
-     * @param string $path the path of the node
-     *
-     * @return string
-     */
-    public function getDeprecationMessage($node, $path)
-    {
-        return strtr($this->deprecationMessage, ['%node%' => $node, '%path%' => $path]);
-    }
-
-    /**
-     * {@inheritdoc}
+     * @return string The Node's name.
      */
     public function getName()
     {
@@ -242,7 +192,9 @@ abstract class BaseNode implements NodeInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Retrieves the path of this node.
+     *
+     * @return string The Node's path
      */
     public function getPath()
     {
@@ -256,12 +208,24 @@ abstract class BaseNode implements NodeInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Merges two values together.
+     *
+     * @param mixed $leftSide
+     * @param mixed $rightSide
+     *
+     * @return mixed The merged value
+     *
+     * @throws ForbiddenOverwriteException
      */
     final public function merge($leftSide, $rightSide)
     {
         if (!$this->allowOverwrite) {
-            throw new ForbiddenOverwriteException(sprintf('Configuration path "%s" cannot be overwritten. You have to define all options for this path, and any of its sub-paths in one configuration section.', $this->getPath()));
+            throw new ForbiddenOverwriteException(sprintf(
+                'Configuration path "%s" cannot be overwritten. You have to '
+               .'define all options for this path, and any of its sub-paths in '
+               .'one configuration section.',
+                $this->getPath()
+            ));
         }
 
         $this->validateType($leftSide);
@@ -271,7 +235,11 @@ abstract class BaseNode implements NodeInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Normalizes a value, applying all normalization closures.
+     *
+     * @param mixed $value Value to normalize.
+     *
+     * @return mixed The normalized value.
      */
     final public function normalize($value)
     {
@@ -299,9 +267,9 @@ abstract class BaseNode implements NodeInterface
     /**
      * Normalizes the value before any other normalization is applied.
      *
-     * @param mixed $value
+     * @param $value
      *
-     * @return mixed The normalized array value
+     * @return $value The normalized array value
      */
     protected function preNormalize($value)
     {
@@ -319,7 +287,14 @@ abstract class BaseNode implements NodeInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Finalizes a value, applying all finalization closures.
+     *
+     * @param mixed $value The value to finalize
+     *
+     * @return mixed The finalized value
+     *
+     * @throws Exception
+     * @throws InvalidConfigurationException
      */
     final public function finalize($value)
     {
@@ -335,7 +310,7 @@ abstract class BaseNode implements NodeInterface
             } catch (Exception $e) {
                 throw $e;
             } catch (\Exception $e) {
-                throw new InvalidConfigurationException(sprintf('Invalid configuration for path "%s": ', $this->getPath()).$e->getMessage(), $e->getCode(), $e);
+                throw new InvalidConfigurationException(sprintf('Invalid configuration for path "%s": %s', $this->getPath(), $e->getMessage()), $e->getCode(), $e);
             }
         }
 
@@ -354,7 +329,7 @@ abstract class BaseNode implements NodeInterface
     /**
      * Normalizes the value.
      *
-     * @param mixed $value The value to normalize
+     * @param mixed $value The value to normalize.
      *
      * @return mixed The normalized value
      */

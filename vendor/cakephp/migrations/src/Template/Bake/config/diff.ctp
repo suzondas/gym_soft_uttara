@@ -54,16 +54,22 @@ class <%= $name %> extends AbstractMigration
             <%- endif; %>
         <%- if ($hasRemoveFK): %>
             ->update();
-        <%- endif; %>
-        <%- if (!empty($tableDiff['columns']['remove']) || !empty($tableDiff['columns']['changed'])): %>
 
-        <%= $this->Migration->tableStatement($tableName, true) %>
-        <%- if (!empty($tableDiff['columns']['remove'])): %>
+        <%- endif; %>
+        <%- if (!empty($tableDiff['columns']['remove'])):
+            $statement = $this->Migration->tableStatement($tableName);
+            if (!empty($statement)): %>
+        <%= $statement %>
+            <%- endif; %>
         <%- foreach ($tableDiff['columns']['remove'] as $columnName => $columnDefinition): %>
             ->removeColumn('<%= $columnName %>')
         <%- endforeach; %>
         <%- endif; %>
-        <%- if (!empty($tableDiff['columns']['changed'])): %>
+        <%- if (!empty($tableDiff['columns']['changed'])):
+            $statement = $this->Migration->tableStatement($tableName);
+            if (!empty($statement)): %>
+        <%= $statement %>
+            <%- endif; %>
         <%- foreach ($tableDiff['columns']['changed'] as $columnName => $columnAttributes):
             $type = $columnAttributes['type'];
             unset($columnAttributes['type']);
@@ -74,29 +80,33 @@ class <%= $name %> extends AbstractMigration
             <%- else: %>
             ->changeColumn('<%= $columnName %>', '<%= $type %>')
             <%- endif; %>
-        <%- endforeach; %>
-        <%- endif; %>
-        <%- if (isset($this->Migration->tableStatements[$tableName])): %>
+        <%- endforeach;
+            if (isset($this->Migration->tableStatements[$tableName])): %>
             ->update();
-        <%- endif; %>
+            <%- endif; %>
         <%- endif; %>
         <%- endforeach; %>
         <%- if (!empty($tables['add'])): %>
-            <%- echo $this->element('Migrations.create-tables', ['tables' => $tables['add'], 'autoId' => $autoId, 'useSchema' => true]) %>
+                <%- echo $this->element('Migrations.create-tables', ['tables' => $tables['add'], 'autoId' => $autoId, 'useSchema' => true]) %>
         <%- endif; %>
         <%- foreach ($data as $tableName => $tableDiff): %>
-        <%- if (!empty($tableDiff['columns']['add']) || !empty($tableDiff['indexes']['add'])): %>
+            <%- if (!empty($tableDiff['columns']['add'])):
+            $statement = $this->Migration->tableStatement($tableName, true);
+            if (!empty($statement)): %>
 
-        <%= $this->Migration->tableStatement($tableName, true) %>
-            <%- if (!empty($tableDiff['columns']['add'])): %>
+        <%= $statement %>
+            <%- endif; %>
             <%- echo $this->element('Migrations.add-columns', ['columns' => $tableDiff['columns']['add']]) %>
             <%- endif; %>
-            <%- if (!empty($tableDiff['indexes']['add'])): %>
+            <%- if (!empty($tableDiff['indexes']['add'])):
+            $statement = $this->Migration->tableStatement($tableName);
+            if (!empty($statement)): %>
+        <%= $statement %>
+            <%- endif; %>
             <%- echo $this->element('Migrations.add-indexes', ['indexes' => $tableDiff['indexes']['add']]) %>
             <%- endif;
             if (isset($this->Migration->tableStatements[$tableName])): %>
             ->update();
-            <%- endif; %>
             <%- endif; %>
         <%- endforeach; %>
         <%- foreach ($data as $tableName => $tableDiff): %>
@@ -107,9 +117,9 @@ class <%= $name %> extends AbstractMigration
             ); %>
             <%- endif; %>
         <%- endforeach; %>
+
         <%- if (!empty($tables['remove'])): %>
         <%- foreach ($tables['remove'] as $tableName => $table): %>
-
         $this->dropTable('<%= $tableName %>');
             <%- endforeach; %>
         <%- endif; %>
@@ -138,9 +148,8 @@ class <%= $name %> extends AbstractMigration
         <%- if (!empty($tables['remove'])): %>
             <%- echo $this->element('Migrations.create-tables', ['tables' => $tables['remove'], 'autoId' => $autoId, 'useSchema' => true]) %>
         <%- endif; %>
-        <%- foreach ($data as $tableName => $tableDiff):
-                unset($this->Migration->tableStatements[$tableName]);
-                if (!empty($tableDiff['indexes']['add'])): %>
+        <%- foreach ($data as $tableName => $tableDiff): %>
+            <%- if (!empty($tableDiff['indexes']['add'])): %>
 
         $this->table('<%= $tableName %>')
                 <%- foreach ($tableDiff['indexes']['add'] as $indexName => $index): %>
@@ -162,7 +171,7 @@ class <%= $name %> extends AbstractMigration
         <%- if (!empty($tableDiff['columns']['changed'])):
             $oldTableDef = $dumpSchema[$tableName];
             foreach ($tableDiff['columns']['changed'] as $columnName => $columnAttributes):
-            $columnAttributes = $oldTableDef->getColumn($columnName);
+            $columnAttributes = $oldTableDef->column($columnName);
             $type = $columnAttributes['type'];
             unset($columnAttributes['type']);
             $columnAttributes = $this->Migration->getColumnOption($columnAttributes);

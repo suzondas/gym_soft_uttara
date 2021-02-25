@@ -13,7 +13,6 @@
  */
 namespace Cake\Chronos\Traits;
 
-use Cake\Chronos\Chronos;
 use Cake\Chronos\ChronosInterface;
 
 /**
@@ -22,38 +21,54 @@ use Cake\Chronos\ChronosInterface;
  */
 trait TestingAidTrait
 {
+    /**
+     * A test ChronosInterface instance to be returned when now instances are created
+     *
+     * @var ChronosInterface
+     */
+    protected static $testNow;
 
     /**
-     * Set the test now used by Date and Time classes provided by Chronos
+     * Set a ChronosInterface instance (real or mock) to be returned when a "now"
+     * instance is created.  The provided instance will be returned
+     * specifically under the following conditions:
+     *   - A call to the static now() method, ex. ChronosInterface::now()
+     *   - When a null (or blank string) is passed to the constructor or parse(), ex. new Chronos(null)
+     *   - When the string "now" is passed to the constructor or parse(), ex. new Chronos('now')
      *
-     * @see \Cake\Chronos\Chronos::setTestNow()
-     * @param \Cake\Chronos\ChronosInterface|string|null $testNow The instance to use for all future instances.
+     * Note the timezone parameter was left out of the examples above and
+     * has no affect as the mock value will be returned regardless of its value.
+     *
+     * To clear the test instance call this method using the default
+     * parameter of null.
+     *
+     * @param ChronosInterface|null $testNow The instance to use for all future instances.
      * @return void
      */
-    public static function setTestNow($testNow = null)
+    public static function setTestNow(ChronosInterface $testNow = null)
     {
-        Chronos::setTestNow($testNow);
+        static::$testNow = $testNow;
     }
 
     /**
-     * Get the test instance stored in Chronos
+     * Get the ChronosInterface instance (real or mock) to be returned when a "now"
+     * instance is created.
      *
-     * @see \Cake\Chronos\Chronos::getTestNow()
-     * @return \Cake\Chronos\ChronosInterface|null the current instance used for testing or null.
+     * @return static the current instance used for testing
      */
     public static function getTestNow()
     {
-        return Chronos::getTestNow();
+        return static::$testNow;
     }
 
     /**
-     * Get whether or not Chronos has a test instance set.
+     * Determine if there is a valid test instance set. A valid test instance
+     * is anything that is not null.
      *
-     * @see \Cake\Chronos\Chronos::hasTestNow()
      * @return bool True if there is a test instance, otherwise false
      */
     public static function hasTestNow()
     {
-        return Chronos::hasTestNow();
+        return static::getTestNow() !== null;
     }
 }

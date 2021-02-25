@@ -12,6 +12,7 @@
  */
 namespace DebugKit\Panel;
 
+use Cake\Controller\Controller;
 use Cake\I18n\Number;
 use DebugKit\DebugMemory;
 use DebugKit\DebugPanel;
@@ -32,7 +33,7 @@ class TimerPanel extends DebugPanel
     {
         $before = function ($name) {
             return function () use ($name) {
-                DebugTimer::start($name);
+                DebugTimer::start($name, __d('debug_kit', $name));
             };
         };
         $after = function ($name) {
@@ -43,35 +44,35 @@ class TimerPanel extends DebugPanel
         $both = function ($name) use ($before, $after) {
             return [
                 ['priority' => 0, 'callable' => $before('Event: ' . $name)],
-                ['priority' => 999, 'callable' => $after('Event: ' . $name)],
+                ['priority' => 999, 'callable' => $after('Event: ' . $name)]
             ];
         };
 
         return [
             'Controller.initialize' => [
                 ['priority' => 0, 'callable' => function () {
-                    DebugMemory::record('Controller initialization');
+                    DebugMemory::record(__d('debug_kit', 'Controller initialization'));
                 }],
                 ['priority' => 0, 'callable' => $before('Event: Controller.initialize')],
-                ['priority' => 999, 'callable' => $after('Event: Controller.initialize')],
+                ['priority' => 999, 'callable' => $after('Event: Controller.initialize')]
             ],
             'Controller.startup' => [
                 ['priority' => 0, 'callable' => $before('Event: Controller.startup')],
                 ['priority' => 999, 'callable' => $after('Event: Controller.startup')],
                 ['priority' => 999, 'callable' => function () {
-                    DebugMemory::record('Controller action start');
-                    DebugTimer::start('Controller: action');
+                    DebugMemory::record(__d('debug_kit', 'Controller action start'));
+                    DebugTimer::start(__d('debug_kit', 'Controller action'));
                 }],
             ],
             'Controller.beforeRender' => [
                 ['priority' => 0, 'callable' => function () {
-                    DebugTimer::stop('Controller: action');
+                    DebugTimer::stop(__d('debug_kit', 'Controller action'));
                 }],
                 ['priority' => 0, 'callable' => $before('Event: Controller.beforeRender')],
                 ['priority' => 999, 'callable' => $after('Event: Controller.beforeRender')],
                 ['priority' => 999, 'callable' => function () {
-                    DebugMemory::record('View Render start');
-                    DebugTimer::start('View: Render');
+                    DebugMemory::record(__d('debug_kit', 'View Render start'));
+                    DebugTimer::start(__d('debug_kit', 'View Render start'));
                 }],
             ],
             'View.beforeRender' => $both('View.beforeRender'),
@@ -80,19 +81,19 @@ class TimerPanel extends DebugPanel
             'View.afterLayout' => $both('View.afterLayout'),
             'View.beforeRenderFile' => [
                 ['priority' => 0, 'callable' => function ($event, $filename) {
-                    DebugTimer::start('Render File: ' . $filename);
+                    DebugTimer::start(__d('debug_kit', 'Render {0}', $filename));
                 }],
             ],
             'View.afterRenderFile' => [
                 ['priority' => 0, 'callable' => function ($event, $filename) {
-                    DebugTimer::stop('Render File: ' . $filename);
+                    DebugTimer::stop(__d('debug_kit', 'Render {0}', $filename));
                 }],
             ],
             'Controller.shutdown' => [
                 ['priority' => 0, 'callable' => $before('Event: Controller.shutdown')],
                 ['priority' => 0, 'callable' => function () {
-                    DebugTimer::stop('View: Render');
-                    DebugMemory::record('Controller shutdown');
+                    DebugTimer::stop(__d('debug_kit', 'View Render start'));
+                    DebugMemory::record(__d('debug_kit', 'Controller shutdown'));
                 }],
                 ['priority' => 999, 'callable' => $after('Event: Controller.shutdown')],
             ],
@@ -123,7 +124,6 @@ class TimerPanel extends DebugPanel
     {
         $time = Number::precision(DebugTimer::requestTime(), 2) . ' s';
         $memory = Number::toReadableSize(DebugMemory::getPeak());
-
         return "$time / $memory";
     }
 }

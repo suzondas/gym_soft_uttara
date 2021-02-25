@@ -1,16 +1,16 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- * @link          https://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * @link          http://cakephp.org CakePHP(tm) Project
  * @since         3.0.0
- * @license       https://opensource.org/licenses/mit-license.php MIT License
+ * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\Collection\Iterator;
 
@@ -20,9 +20,11 @@ use RecursiveIteratorIterator;
 /**
  * Iterator for flattening elements in a tree structure while adding some
  * visual markers for their relative position in the tree
+ *
  */
 class TreePrinter extends RecursiveIteratorIterator
 {
+
     use CollectionTrait;
 
     /**
@@ -81,7 +83,6 @@ class TreePrinter extends RecursiveIteratorIterator
     public function key()
     {
         $extractor = $this->_key;
-
         return $extractor($this->_fetchCurrent(), parent::key(), $this);
     }
 
@@ -95,7 +96,6 @@ class TreePrinter extends RecursiveIteratorIterator
         $extractor = $this->_value;
         $current = $this->_fetchCurrent();
         $spacer = str_repeat($this->_spacer, $this->getDepth());
-
         return $spacer . $extractor($current, parent::key(), $this);
     }
 
@@ -120,7 +120,6 @@ class TreePrinter extends RecursiveIteratorIterator
         if ($this->_current !== null) {
             return $this->_current;
         }
-
         return $this->_current = parent::current();
     }
 }

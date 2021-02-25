@@ -21,32 +21,6 @@ use InvalidArgumentException;
  *
  * This object can be mutated in place using any setter method,
  * or __set().
- *
- * @property int $year
- * @property int $yearIso
- * @property int $month
- * @property int $day
- * @property int $hour
- * @property int $minute
- * @property int $second
- * @property int $timestamp seconds since the Unix Epoch
- * @property DateTimeZone|string $timezone the current timezone
- * @property DateTimeZone|string $tz alias of timezone
- * @property int $micro
- * @property-read int $dayOfWeek 1 (for Monday) through 7 (for Sunday)
- * @property-read int $dayOfYear 0 through 365
- * @property-read int $weekOfMonth 1 through 5
- * @property-read int $weekOfYear ISO-8601 week number of year, weeks starting on Monday
- * @property-read int $daysInMonth number of days in the given month
- * @property-read int $age does a diffInYears() with default parameters
- * @property-read int $quarter the quarter of this instance, 1 - 4
- * @property-read int $offset the timezone offset in seconds from UTC
- * @property-read int $offsetHours the timezone offset in hours from UTC
- * @property-read bool $dst daylight savings time indicator, true if DST, false otherwise
- * @property-read bool $local checks if the timezone is local, true if local, false otherwise
- * @property-read bool $utc checks if the timezone is UTC, true if UTC, false otherwise
- * @property-read string $timezoneName
- * @property-read string $tzName
  */
 class MutableDateTime extends DateTime implements ChronosInterface
 {
@@ -74,7 +48,7 @@ class MutableDateTime extends DateTime implements ChronosInterface
      * for more on the possibility of this constructor returning a test instance.
      *
      * @param string|null $time Fixed or relative time
-     * @param \DateTimeZone|string|null $tz The timezone for the instance
+     * @param DateTimeZone|string|null $tz The timezone for the instance
      */
     public function __construct($time = 'now', $tz = null)
     {
@@ -82,30 +56,26 @@ class MutableDateTime extends DateTime implements ChronosInterface
             $tz = $tz instanceof DateTimeZone ? $tz : new DateTimeZone($tz);
         }
 
-        $testNow = Chronos::getTestNow();
-        if ($testNow === null) {
-            parent::__construct($time === null ? 'now' : $time, $tz);
-
-            return;
+        if (static::$testNow === null) {
+            return parent::__construct($time === null ? 'now' : $time, $tz);
         }
 
         $relative = static::hasRelativeKeywords($time);
         if (!empty($time) && $time !== 'now' && !$relative) {
-            parent::__construct($time, $tz);
-
-            return;
+            return parent::__construct($time, $tz);
         }
 
-        $testNow = clone $testNow;
+        $testInstance = clone static::getTestNow();
         if ($relative) {
-            $testNow = $testNow->modify($time);
+            $testInstance = $testInstance;
+            $testInstance = $testInstance->modify($time);
         }
 
-        $relativetime = static::isTimeExpression($time);
-        if (!$relativetime && $tz !== $testNow->getTimezone()) {
-            $testNow = $testNow->setTimezone($tz === null ? date_default_timezone_get() : $tz);
+        if ($tz !== $testInstance->getTimezone()) {
+            $testInstance = $testInstance->setTimezone($tz === null ? date_default_timezone_get() : $tz);
         }
-        $time = $testNow->format('Y-m-d H:i:s.u');
+
+        $time = $testInstance->format('Y-m-d H:i:s.u');
         parent::__construct($time, $tz);
     }
 
@@ -123,8 +93,8 @@ class MutableDateTime extends DateTime implements ChronosInterface
      * Set a part of the ChronosInterface object
      *
      * @param string $name The property to set.
-     * @param string|int|\DateTimeZone $value The value to set.
-     * @throws \InvalidArgumentException
+     * @param string|int|DateTimeZone $value The value to set.
+     * @throws InvalidArgumentException
      * @return void
      */
     public function __set($name, $value)
@@ -166,21 +136,5 @@ class MutableDateTime extends DateTime implements ChronosInterface
             default:
                 throw new InvalidArgumentException(sprintf("Unknown setter '%s'", $name));
         }
-    }
-
-    /**
-     * Return properties for debugging.
-     *
-     * @return array
-     */
-    public function __debugInfo()
-    {
-        $properties = [
-            'hasFixedNow' => static::hasTestNow(),
-            'time' => $this->format('Y-m-d H:i:s.u'),
-            'timezone' => $this->getTimezone()->getName(),
-        ];
-
-        return $properties;
     }
 }

@@ -1,22 +1,22 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- * @link          https://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * @link          http://cakephp.org CakePHP(tm) Project
  * @since         3.0.0
- * @license       https://opensource.org/licenses/mit-license.php MIT License
+ * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\Controller\Component;
 
 use Cake\Controller\Component;
 use Cake\Controller\ComponentRegistry;
-use Cake\Http\Exception\InternalErrorException;
+use Cake\Network\Exception\InternalErrorException;
 use Cake\Utility\Inflector;
 use Exception;
 
@@ -30,11 +30,11 @@ use Exception;
  */
 class FlashComponent extends Component
 {
+
     /**
      * The Session object instance
      *
-     * @var \Cake\Http\Session
-     * @deprecated 3.7.5 This property will be removed in 4.0.0 in favor of `getSession()` method.
+     * @var \Cake\Network\Session
      */
     protected $_session;
 
@@ -47,8 +47,7 @@ class FlashComponent extends Component
         'key' => 'flash',
         'element' => 'default',
         'params' => [],
-        'clear' => false,
-        'duplicate' => true,
+        'clear' => false
     ];
 
     /**
@@ -60,7 +59,7 @@ class FlashComponent extends Component
     public function __construct(ComponentRegistry $registry, array $config = [])
     {
         parent::__construct($registry, $config);
-        $this->_session = $registry->getController()->getRequest()->getSession();
+        $this->_session = $registry->getController()->request->session();
     }
 
     /**
@@ -76,7 +75,6 @@ class FlashComponent extends Component
      * - `element` The element used to render the flash message. Default to 'default'.
      * - `params` An array of variables to make available when using an element
      * - `clear` A bool stating if the current stack should be cleared to start a new one
-     * - `escape` Set to false to allow templates to print out HTML content
      *
      * @param string|\Exception $message Message to be flashed. If an instance
      *   of \Exception the exception message will be used and code will be set
@@ -86,17 +84,11 @@ class FlashComponent extends Component
      */
     public function set($message, array $options = [])
     {
-        $options += (array)$this->getConfig();
+        $options += $this->config();
 
         if ($message instanceof Exception) {
-            if (!isset($options['params']['code'])) {
-                $options['params']['code'] = $message->getCode();
-            }
+            $options['params'] += ['code' => $message->getCode()];
             $message = $message->getMessage();
-        }
-
-        if (isset($options['escape']) && !isset($options['params']['escape'])) {
-            $options['params']['escape'] = $options['escape'];
         }
 
         list($plugin, $element) = pluginSplit($options['element']);
@@ -108,26 +100,18 @@ class FlashComponent extends Component
         }
 
         $messages = [];
-        if (!$options['clear']) {
-            $messages = (array)$this->getSession()->read('Flash.' . $options['key']);
-        }
-
-        if (!$options['duplicate']) {
-            foreach ($messages as $existingMessage) {
-                if ($existingMessage['message'] === $message) {
-                    return;
-                }
-            }
+        if ($options['clear'] === false) {
+            $messages = $this->_session->read('Flash.' . $options['key']);
         }
 
         $messages[] = [
             'message' => $message,
             'key' => $options['key'],
             'element' => $options['element'],
-            'params' => $options['params'],
+            'params' => $options['params']
         ];
 
-        $this->getSession()->write('Flash.' . $options['key'], $messages);
+        $this->_session->write('Flash.' . $options['key'], $messages);
     }
 
     /**
@@ -150,7 +134,7 @@ class FlashComponent extends Component
      * @param string $name Element name to use.
      * @param array $args Parameters to pass when calling `FlashComponent::set()`.
      * @return void
-     * @throws \Cake\Http\Exception\InternalErrorException If missing the flash message.
+     * @throws \Cake\Network\Exception\InternalErrorException If missing the flash message.
      */
     public function __call($name, $args)
     {
@@ -171,15 +155,5 @@ class FlashComponent extends Component
         }
 
         $this->set($args[0], $options);
-    }
-
-    /**
-     * Returns current session object from a controller request.
-     *
-     * @return \Cake\Http\Session
-     */
-    protected function getSession()
-    {
-        return $this->getController()->getRequest()->getSession();
     }
 }

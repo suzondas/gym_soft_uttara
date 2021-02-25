@@ -1,16 +1,16 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- * @link          https://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * @link          http://cakephp.org CakePHP(tm) Project
  * @since         3.0.0
- * @license       https://opensource.org/licenses/mit-license.php MIT License
+ * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\I18n;
 
@@ -23,6 +23,7 @@ use JsonSerializable;
 /**
  * Extends the built-in DateTime class to provide handy methods and locale-aware
  * formatting helpers
+ *
  */
 class Time extends MutableDateTime implements JsonSerializable
 {
@@ -30,10 +31,10 @@ class Time extends MutableDateTime implements JsonSerializable
 
     /**
      * The format to use when formatting a time using `Cake\I18n\Time::i18nFormat()`
-     * and `__toString`. This format is also used by `parseDateTime()`.
+     * and `__toString`
      *
      * The format should be either the formatting constants from IntlDateFormatter as
-     * described in (https://secure.php.net/manual/en/class.intldateformatter.php) or a pattern
+     * described in (http://www.php.net/manual/en/class.intldateformatter.php) or a pattern
      * as specified in (http://www.icu-project.org/apiref/icu4c/classSimpleDateFormat.html#details)
      *
      * It is possible to provide an array of 2 constants. In this case, the first position
@@ -49,7 +50,7 @@ class Time extends MutableDateTime implements JsonSerializable
      * The format to use when formatting a time using `Cake\I18n\Time::nice()`
      *
      * The format should be either the formatting constants from IntlDateFormatter as
-     * described in (https://secure.php.net/manual/en/class.intldateformatter.php) or a pattern
+     * described in (http://www.php.net/manual/en/class.intldateformatter.php) or a pattern
      * as specified in (http://www.icu-project.org/apiref/icu4c/classSimpleDateFormat.html#details)
      *
      * It is possible to provide an array of 2 constants. In this case, the first position
@@ -65,7 +66,7 @@ class Time extends MutableDateTime implements JsonSerializable
      * The format to use when formatting a time using `Cake\I18n\Time::timeAgoInWords()`
      * and the difference is more than `Cake\I18n\Time::$wordEnd`
      *
-     * @var string|array|int
+     * @var string
      * @see \Cake\I18n\Time::timeAgoInWords()
      */
     public static $wordFormat = [IntlDateFormatter::SHORT, -1];
@@ -74,17 +75,17 @@ class Time extends MutableDateTime implements JsonSerializable
      * The format to use when formatting a time using `Time::timeAgoInWords()`
      * and the difference is less than `Time::$wordEnd`
      *
-     * @var string[]
+     * @var array
      * @see \Cake\I18n\Time::timeAgoInWords()
      */
     public static $wordAccuracy = [
-        'year' => 'day',
-        'month' => 'day',
-        'week' => 'day',
-        'day' => 'hour',
-        'hour' => 'minute',
-        'minute' => 'minute',
-        'second' => 'second',
+        'year' => "day",
+        'month' => "day",
+        'week' => "day",
+        'day' => "hour",
+        'hour' => "minute",
+        'minute' => "minute",
+        'second' => "second",
     ];
 
     /**
@@ -96,20 +97,13 @@ class Time extends MutableDateTime implements JsonSerializable
     public static $wordEnd = '+1 month';
 
     /**
-     * serialise the value as a Unix Timestamp
-     *
-     * @var string
-     */
-    const UNIX_TIMESTAMP_FORMAT = 'unixTimestampFormat';
-
-    /**
      * {@inheritDoc}
      */
     public function __construct($time = null, $tz = null)
     {
         if ($time instanceof DateTimeInterface) {
-            $tz = $time->getTimezone();
-            $time = $time->format('Y-m-d H:i:s.u');
+            $tz = $time->getTimeZone();
+            $time = $time->format('Y-m-d H:i:s');
         }
 
         if (is_numeric($time)) {
@@ -168,11 +162,11 @@ class Time extends MutableDateTime implements JsonSerializable
      * Returns the quarter
      *
      * @param bool $range Range.
-     * @return string[]|int 1, 2, 3, or 4 quarter of year, or array if $range true
+     * @return int|array 1, 2, 3, or 4 quarter of year, or array if $range true
      */
     public function toQuarter($range = false)
     {
-        $quarter = (int)ceil((int)$this->format('m') / 3);
+        $quarter = ceil($this->format('m') / 3);
         if ($range === false) {
             return $quarter;
         }
@@ -239,7 +233,7 @@ class Time extends MutableDateTime implements JsonSerializable
      */
     public function timeAgoInWords(array $options = [])
     {
-        return static::diffFormatter()->timeAgoInWords($this, $options);
+        return $this->diffFormatter()->timeAgoInWords($this, $options);
     }
 
     /**
@@ -312,10 +306,8 @@ class Time extends MutableDateTime implements JsonSerializable
                     $groupedIdentifiers[$item[0]] = [$tz => $item[0] . $abbr];
                 }
             }
-
             return $groupedIdentifiers;
         }
-
         return array_combine($identifiers, $identifiers);
     }
 
@@ -334,13 +326,8 @@ class Time extends MutableDateTime implements JsonSerializable
     {
         $tmp = trim($timeInterval);
         if (is_numeric($tmp)) {
-            deprecationWarning(
-                'Passing int/numeric string into Time::wasWithinLast() is deprecated. ' .
-                'Pass strings including interval eg. "6 days"'
-            );
             $timeInterval = $tmp . ' days';
         }
-
         return parent::wasWithinLast($timeInterval);
     }
 
@@ -359,13 +346,8 @@ class Time extends MutableDateTime implements JsonSerializable
     {
         $tmp = trim($timeInterval);
         if (is_numeric($tmp)) {
-            deprecationWarning(
-                'Passing int/numeric string into Time::isWithinNext() is deprecated. ' .
-                'Pass strings including interval eg. "6 days"'
-            );
             $timeInterval = $tmp . ' days';
         }
-
         return parent::isWithinNext($timeInterval);
     }
 }

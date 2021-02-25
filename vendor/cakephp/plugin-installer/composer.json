@@ -1,39 +1,30 @@
 {
     "name": "cakephp/plugin-installer",
     "description": "A composer installer for CakePHP 3.0+ plugins.",
-    "type": "composer-plugin",
+    "type": "composer-installer",
     "license": "MIT",
     "authors": [
         {
             "name": "CakePHP Community",
-            "homepage": "https://cakephp.org"
+            "homepage": "http://cakephp.org"
         }
     ],
-    "require": {
-        "php": ">=5.6.0",
-        "composer-plugin-api": "^1.0 || ^2.0"
-    },
     "require-dev": {
-        "cakephp/cakephp-codesniffer": "^3.3",
-        "composer/composer": "^2.0",
-        "phpunit/phpunit": "^5.7 || ^6.5 || ^8.5 || ^9.3"
+        "composer/composer": "1.0.*@dev",
+        "cakephp/cakephp-codesniffer": "dev-master"
     },
     "autoload": {
         "psr-4": {
-            "Cake\\Composer\\": "src/"
+            "Cake\\Composer\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Cake\\Test\\TestCase\\Composer\\": "tests/TestCase/",
-            "Cake\\Test\\TestCase\\Composer\\Php56\\": "tests/php56/TestCase/"
+            "Cake\\Test\\Composer\\": "tests"
         }
     },
     "extra": {
-        "class": "Cake\\Composer\\Plugin"
+        "class": "Cake\\Composer\\Installer\\PluginInstaller"
     },
-    "config": {
-        "sort-packages": true
-    },
-    "prefer-stable": true
+    "minimum-stability": "dev"
 }

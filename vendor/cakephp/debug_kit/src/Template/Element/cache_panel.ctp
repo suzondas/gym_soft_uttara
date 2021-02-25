@@ -11,11 +11,6 @@
  * @since         DebugKit 0.1
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-
-/**
- * @var \DebugKit\View\AjaxView $this
- * @var array $metrics
- */
 ?>
 <?php if (empty($metrics)): ?>
     <p class="info"><?= __d('debug_kit', 'There were no cache operations this request.') ?></p>
@@ -23,7 +18,7 @@
     <?php foreach ($metrics as $name => $counters): ?>
     <section class="section-tile">
         <h3><?= __d('debug_kit', '{0} Metrics', h($name)) ?> </h3>
-        <button class="btn-primary clear-cache" data-name="<?= h($name) ?>"><?= __d('debug_kit', 'Clear {0} cache', h($name)) ?></button>
+        <button class="btn-primary clear-cache" data-name="<?= h($name) ?>">Clear <?= h($name) ?> cache</button>
         <span class="inline-message"></span>
         <table cellspacing="0" cellpadding="0" class="debug-table">
             <thead>
@@ -63,16 +58,15 @@ $(document).ready(function() {
         var messageEl = el.parent().find('.inline-message');
 
         var xhr = $.ajax({
-            headers: {'X-CSRF-TOKEN': '<?= $this->request->getParam('_csrfToken') ?>'},
             url: baseUrl,
             data: {name: name},
             dataType: 'json',
             type: 'POST'
         });
         xhr.done(function(response) {
-            showMessage(messageEl, name + ' ' + '<?= __d('debug_kit', 'cache cleared.') ?>');
+            showMessage(messageEl, name + ' cache cleared.')
         }).error(function(response) {
-            showMessage(messageEl, name + ' ' + '<?= __d('debug_kit', 'cache could not be cleared.') ?>');
+            showMessage(messageEl, name + ' cache could not be cleared.');
         });
         e.preventDefault();
     });

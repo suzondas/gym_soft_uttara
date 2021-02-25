@@ -84,9 +84,16 @@ class ChronosInterval extends DateInterval
     const PHP_DAYS_FALSE = -99999;
 
     /**
+     * Whether or not this object was created in HHVM
+     *
+     * @var bool
+     */
+    protected $isHHVM = false;
+
+    /**
      * Determine if the interval was created via DateTime:diff() or not.
      *
-     * @param \DateInterval $interval The interval to check.
+     * @param DateInterval $interval The interval to check.
      * @return bool
      */
     protected static function wasCreatedFromDiff(DateInterval $interval)
@@ -107,6 +114,7 @@ class ChronosInterval extends DateInterval
      */
     public function __construct($years = 1, $months = null, $weeks = null, $days = null, $hours = null, $minutes = null, $seconds = null)
     {
+        $this->isHHVM = defined('HHVM_VERSION');
         $spec = static::PERIOD_PREFIX;
 
         $spec .= $years > 0 ? $years . static::PERIOD_YEARS : '';
@@ -209,8 +217,8 @@ class ChronosInterval extends DateInterval
      * DateInterval objects created from DateTime::diff() as you can't externally
      * set the $days field.
      *
-     * @param \DateInterval $di The DateInterval instance to copy.
-     * @throws \InvalidArgumentException
+     * @param DateInterval $di The DateInterval instance to copy.
+     * @throws InvalidArgumentException
      * @return static
      */
     public static function instance(DateInterval $di)
@@ -224,7 +232,6 @@ class ChronosInterval extends DateInterval
         $instance = new static($di->y, $di->m, 0, $di->d, $di->h, $di->i, $di->s);
         $instance->invert = $di->invert;
         $instance->days = $di->days;
-
         return $instance;
     }
 
@@ -232,38 +239,38 @@ class ChronosInterval extends DateInterval
      * Get a part of the ChronosInterval object
      *
      * @param string $name The property to read.
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      * @return int
      */
     public function __get($name)
     {
         switch ($name) {
             case 'years':
-                return $this->y;
+                return $this->isHHVM ? parent::__get('y') : $this->y;
 
             case 'months':
-                return $this->m;
+                return $this->isHHVM ? parent::__get('m') : $this->m;
 
             case 'dayz':
-                return $this->d;
+                return $this->isHHVM ? parent::__get('d') : $this->d;
 
             case 'hours':
-                return $this->h;
+                return $this->isHHVM ? parent::__get('h') : $this->h;
 
             case 'minutes':
-                return $this->i;
+                return $this->isHHVM ? parent::__get('i') : $this->i;
 
             case 'seconds':
-                return $this->s;
+                return $this->isHHVM ? parent::__get('s') : $this->s;
 
             case 'weeks':
-                return (int)floor($this->d / ChronosInterface::DAYS_PER_WEEK);
+                return (int)floor(($this->isHHVM ? parent::__get('d') : $this->d) / ChronosInterface::DAYS_PER_WEEK);
 
             case 'daysExcludeWeeks':
             case 'dayzExcludeWeeks':
                 return $this->dayz % ChronosInterface::DAYS_PER_WEEK;
             case 'days':
-                return $this->days;
+                return $this->isHHVM ? parent::__get('days') : $this->days;
             case 'y':
             case 'm':
             case 'd':
@@ -283,43 +290,47 @@ class ChronosInterval extends DateInterval
      * @param string $name The property to augment.
      * @param int $val The value to change.
      * @return void
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function __set($name, $val)
     {
         switch ($name) {
             case 'years':
-                $this->y = $val;
+                $this->isHHVM ? parent::__set('y', $val) : $this->y = $val;
                 break;
 
             case 'months':
-                $this->m = $val;
+                $this->isHHVM ? parent::__set('m', $val) : $this->m = $val;
                 break;
 
             case 'weeks':
                 $val = $val * ChronosInterface::DAYS_PER_WEEK;
-                $this->d = $val;
+                $this->isHHVM ? parent::__set('d', $val) : $this->d = $val;
                 break;
 
             case 'dayz':
-                $this->d = $val;
+                $this->isHHVM ? parent::__set('d', $val) : $this->d = $val;
                 break;
 
             case 'hours':
-                $this->h = $val;
+                $this->isHHVM ? parent::__set('h', $val) : $this->h = $val;
                 break;
 
             case 'minutes':
-                $this->i = $val;
+                $this->isHHVM ? parent::__set('i', $val) : $this->i = $val;
                 break;
 
             case 'seconds':
-                $this->s = $val;
+                $this->isHHVM ? parent::__set('s', $val) : $this->s = $val;
                 break;
 
             case 'invert':
-                $this->invert = $val;
+                $this->isHHVM ? parent::__set('invert', $val) : $this->invert = $val;
                 break;
+            default:
+                if ($this->isHHVM) {
+                    parent::__set($name, $val);
+                }
         }
     }
 
@@ -333,7 +344,6 @@ class ChronosInterval extends DateInterval
     public function weeksAndDays($weeks, $days)
     {
         $this->dayz = ($weeks * ChronosInterface::DAYS_PER_WEEK) + $days;
-
         return $this;
     }
 
@@ -396,7 +406,7 @@ class ChronosInterval extends DateInterval
     /**
      * Add the passed interval to the current instance
      *
-     * @param \DateInterval $interval The interval to add.
+     * @param DateInterval $interval The interval to add.
      * @return static
      */
     public function add(DateInterval $interval)
@@ -424,72 +434,16 @@ class ChronosInterval extends DateInterval
      */
     public function __toString()
     {
-        // equivalence
-        $oneMinuteInSeconds = 60;
-        $oneHourInSeconds = $oneMinuteInSeconds * 60;
-        $oneDayInSeconds = $oneHourInSeconds * 24;
-        $oneMonthInDays = 365 / 12;
-        $oneMonthInSeconds = $oneDayInSeconds * $oneMonthInDays;
-        $oneYearInSeconds = 12 * $oneMonthInSeconds;
-
-        // convert
-        $ySecs = $this->y * $oneYearInSeconds;
-        $mSecs = $this->m * $oneMonthInSeconds;
-        $dSecs = $this->d * $oneDayInSeconds;
-        $hSecs = $this->h * $oneHourInSeconds;
-        $iSecs = $this->i * $oneMinuteInSeconds;
-        $sSecs = $this->s;
-
-        $totalSecs = $ySecs + $mSecs + $dSecs + $hSecs + $iSecs + $sSecs;
-
-        $y = null;
-        $m = null;
-        $d = null;
-        $h = null;
-        $i = null;
-
-        // years
-        if ($totalSecs >= $oneYearInSeconds) {
-            $y = floor($totalSecs / $oneYearInSeconds);
-            $totalSecs = $totalSecs - $y * $oneYearInSeconds;
-        }
-
-        // months
-        if ($totalSecs >= $oneMonthInSeconds) {
-            $m = floor($totalSecs / $oneMonthInSeconds);
-            $totalSecs = $totalSecs - $m * $oneMonthInSeconds;
-        }
-
-        // days
-        if ($totalSecs >= $oneDayInSeconds) {
-            $d = floor($totalSecs / $oneDayInSeconds);
-            $totalSecs = $totalSecs - $d * $oneDayInSeconds;
-        }
-
-        // hours
-        if ($totalSecs >= $oneHourInSeconds) {
-            $h = floor($totalSecs / $oneHourInSeconds);
-            $totalSecs = $totalSecs - $h * $oneHourInSeconds;
-        }
-
-        // minutes
-        if ($totalSecs >= $oneMinuteInSeconds) {
-            $i = floor($totalSecs / $oneMinuteInSeconds);
-            $totalSecs = $totalSecs - $i * $oneMinuteInSeconds;
-        }
-
-        $s = $totalSecs;
-
         $date = array_filter([
-            static::PERIOD_YEARS => $y,
-            static::PERIOD_MONTHS => $m,
-            static::PERIOD_DAYS => $d,
+            static::PERIOD_YEARS => $this->y,
+            static::PERIOD_MONTHS => $this->m,
+            static::PERIOD_DAYS => $this->d,
         ]);
 
         $time = array_filter([
-            static::PERIOD_HOURS => $h,
-            static::PERIOD_MINUTES => $i,
-            static::PERIOD_SECONDS => $s,
+            static::PERIOD_HOURS => $this->h,
+            static::PERIOD_MINUTES => $this->i,
+            static::PERIOD_SECONDS => $this->s,
         ]);
 
         $specString = static::PERIOD_PREFIX;
@@ -505,10 +459,6 @@ class ChronosInterval extends DateInterval
             }
         }
 
-        if ($specString === static::PERIOD_PREFIX) {
-            return 'PT0S';
-        }
-
-        return $this->invert === 1 ? '-' . $specString : $specString;
+        return $specString === static::PERIOD_PREFIX ? 'PT0S' : $specString;
     }
 }

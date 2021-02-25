@@ -14,6 +14,7 @@
 namespace DebugKit\Panel;
 
 use Cake\Cache\Cache;
+use Cake\Event\Event;
 use DebugKit\Cache\Engine\DebugEngine;
 use DebugKit\DebugPanel;
 
@@ -26,7 +27,7 @@ class CachePanel extends DebugPanel
     /**
      * The cache spy instances used.
      *
-     * @var DebugEngine[]
+     * @var void
      */
     protected $_instances = [];
 
@@ -38,17 +39,15 @@ class CachePanel extends DebugPanel
     public function initialize()
     {
         foreach (Cache::configured() as $name) {
-            $config = Cache::getConfig($name);
-            if (isset($config['className']) && $config['className'] instanceof DebugEngine) {
+            $config = Cache::config($name);
+            if ($config['className'] instanceof DebugEngine) {
                 $instance = $config['className'];
-            } elseif (isset($config['className'])) {
+            } else {
                 Cache::drop($name);
                 $instance = new DebugEngine($config);
-                Cache::setConfig($name, $instance);
+                Cache::config($name, $instance);
             }
-            if (isset($instance)) {
-                $this->_instances[$name] = $instance;
-            }
+            $this->_instances[$name] = $instance;
         }
     }
 
@@ -63,9 +62,8 @@ class CachePanel extends DebugPanel
         foreach ($this->_instances as $name => $instance) {
             $metrics[$name] = $instance->metrics();
         }
-
         return [
-            'metrics' => $metrics,
+            'metrics' => $metrics
         ];
     }
 }

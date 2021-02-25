@@ -1,16 +1,16 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- * @link          https://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * @link          http://cakephp.org CakePHP(tm) Project
  * @since         2.2.0
- * @license       https://opensource.org/licenses/mit-license.php MIT License
+ * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\Log;
 
@@ -24,6 +24,7 @@ use RuntimeException;
  */
 class LogEngineRegistry extends ObjectRegistry
 {
+
     /**
      * Resolve a logger classname.
      *
@@ -47,7 +48,7 @@ class LogEngineRegistry extends ObjectRegistry
      * Part of the template method for Cake\Core\ObjectRegistry::load()
      *
      * @param string $class The classname that is missing.
-     * @param string|null $plugin The plugin the logger is missing in.
+     * @param string $plugin The plugin the logger is missing in.
      * @return void
      * @throws \RuntimeException
      */
@@ -94,12 +95,10 @@ class LogEngineRegistry extends ObjectRegistry
      * Remove a single logger from the registry.
      *
      * @param string $name The logger name.
-     * @return $this
+     * @return void
      */
     public function unload($name)
     {
         unset($this->_loaded[$name]);
-
-        return $this;
     }
 }

@@ -22,6 +22,8 @@ class DirectoryResource implements SelfCheckingResourceInterface, \Serializable
     private $pattern;
 
     /**
+     * Constructor.
+     *
      * @param string      $resource The file path to the resource
      * @param string|null $pattern  A pattern to restrict monitored files
      *
@@ -29,7 +31,7 @@ class DirectoryResource implements SelfCheckingResourceInterface, \Serializable
      */
     public function __construct($resource, $pattern = null)
     {
-        $this->resource = realpath($resource) ?: (file_exists($resource) ? $resource : false);
+        $this->resource = realpath($resource);
         $this->pattern = $pattern;
 
         if (false === $this->resource || !is_dir($this->resource)) {
@@ -42,7 +44,7 @@ class DirectoryResource implements SelfCheckingResourceInterface, \Serializable
      */
     public function __toString()
     {
-        return md5(serialize([$this->resource, $this->pattern]));
+        return md5(serialize(array($this->resource, $this->pattern)));
     }
 
     /**
@@ -72,10 +74,7 @@ class DirectoryResource implements SelfCheckingResourceInterface, \Serializable
             return false;
         }
 
-        if ($timestamp < filemtime($this->resource)) {
-            return false;
-        }
-
+        $newestMTime = filemtime($this->resource);
         foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->resource), \RecursiveIteratorIterator::SELF_FIRST) as $file) {
             // if regex filtering is enabled only check matching files
             if ($this->pattern && $file->isFile() && !preg_match($this->pattern, $file->getBasename())) {
@@ -88,33 +87,17 @@ class DirectoryResource implements SelfCheckingResourceInterface, \Serializable
                 continue;
             }
 
-            // for broken links
-            try {
-                $fileMTime = $file->getMTime();
-            } catch (\RuntimeException $e) {
-                continue;
-            }
-
-            // early return if a file's mtime exceeds the passed timestamp
-            if ($timestamp < $fileMTime) {
-                return false;
-            }
+            $newestMTime = max($file->getMTime(), $newestMTime);
         }
 
-        return true;
+        return $newestMTime < $timestamp;
     }
 
-    /**
-     * @internal
-     */
     public function serialize()
     {
-        return serialize([$this->resource, $this->pattern]);
+        return serialize(array($this->resource, $this->pattern));
     }
 
-    /**
-     * @internal
-     */
     public function unserialize($serialized)
     {
         list($this->resource, $this->pattern) = unserialize($serialized);

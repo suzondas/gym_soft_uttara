@@ -1,23 +1,25 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
- * Copyright 2005-2011, Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
+ * Copyright 2005-2011, Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
  * Licensed under The MIT License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- * @link          https://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * @link          http://cakephp.org CakePHP(tm) Project
  * @since         3.0.0
- * @license       https://opensource.org/licenses/mit-license.php MIT License
+ * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\Core;
 
 /**
  * ClassLoader
+ *
  */
 class ClassLoader
 {
+
     /**
      * An associative array where the key is a namespace prefix and the value
      * is an array of base directories for classes in that namespace.
@@ -61,7 +63,7 @@ class ClassLoader
         if ($prepend) {
             array_unshift($this->_prefixes[$prefix], $baseDir);
         } else {
-            $this->_prefixes[$prefix][] = $baseDir;
+            array_push($this->_prefixes[$prefix], $baseDir);
         }
     }
 
@@ -96,7 +98,7 @@ class ClassLoader
      *
      * @param string $prefix The namespace prefix.
      * @param string $relativeClass The relative class name.
-     * @return string|false Boolean false if no mapped file can be loaded, or the
+     * @return mixed Boolean false if no mapped file can be loaded, or the
      * name of the mapped file that was loaded.
      */
     protected function _loadMappedFile($prefix, $relativeClass)
@@ -126,10 +128,8 @@ class ClassLoader
     {
         if (file_exists($file)) {
             require $file;
-
             return true;
         }
-
         return false;
     }
 }

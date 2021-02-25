@@ -15,6 +15,7 @@ namespace DebugKit\Cache\Engine;
 
 use Cake\Cache\CacheEngine;
 use Cake\Cache\CacheRegistry;
+use Cake\Core\App;
 use DebugKit\DebugTimer;
 
 /**
@@ -72,13 +73,11 @@ class DebugEngine extends CacheEngine
     {
         if (is_object($this->_config)) {
             $this->_engine = $this->_config;
-
             return true;
         }
-        $registry = new CacheRegistry();
+        $registry = new CacheRegistry;
         $this->_engine = $registry->load('spies', $this->_config);
         unset($registry);
-
         return true;
     }
 
@@ -122,7 +121,6 @@ class DebugEngine extends CacheEngine
         DebugTimer::start('Cache.write ' . $key);
         $result = $this->_engine->write($key, $value);
         DebugTimer::stop('Cache.write ' . $key);
-
         return $result;
     }
 
@@ -135,7 +133,6 @@ class DebugEngine extends CacheEngine
         DebugTimer::start('Cache.writeMany');
         $result = $this->_engine->writeMany($data);
         DebugTimer::stop('Cache.writeMany');
-
         return $result;
     }
 
@@ -153,7 +150,6 @@ class DebugEngine extends CacheEngine
             $metric = 'miss';
         }
         $this->_track($metric);
-
         return $result;
     }
 
@@ -166,7 +162,6 @@ class DebugEngine extends CacheEngine
         DebugTimer::start('Cache.readMany');
         $result = $this->_engine->readMany($data);
         DebugTimer::stop('Cache.readMany');
-
         return $result;
     }
 
@@ -179,7 +174,6 @@ class DebugEngine extends CacheEngine
         DebugTimer::start('Cache.increment ' . $key);
         $result = $this->_engine->increment($key, $offset);
         DebugTimer::stop('Cache.increment ' . $key);
-
         return $result;
     }
 
@@ -192,7 +186,6 @@ class DebugEngine extends CacheEngine
         DebugTimer::start('Cache.decrement ' . $key);
         $result = $this->_engine->decrement($key, $offset);
         DebugTimer::stop('Cache.decrement ' . $key);
-
         return $result;
     }
 
@@ -205,7 +198,6 @@ class DebugEngine extends CacheEngine
         DebugTimer::start('Cache.delete ' . $key);
         $result = $this->_engine->delete($key);
         DebugTimer::stop('Cache.delete ' . $key);
-
         return $result;
     }
 
@@ -218,7 +210,6 @@ class DebugEngine extends CacheEngine
         DebugTimer::start('Cache.deleteMany');
         $result = $this->_engine->deleteMany($data);
         DebugTimer::stop('Cache.deleteMany');
-
         return $result;
     }
 
@@ -231,7 +222,6 @@ class DebugEngine extends CacheEngine
         DebugTimer::start('Cache.clear');
         $result = $this->_engine->clear($check);
         DebugTimer::stop('Cache.clear');
-
         return $result;
     }
 
@@ -249,41 +239,13 @@ class DebugEngine extends CacheEngine
      * This method uses func_get_args() as not doing so confuses the
      * proxied class.
      *
-     * @deprecated 3.6.0 use setConfig()/getConfig() instead.
      * @param string $key The key to set/read.
      * @param mixed $value The value to set.
      * @param bool $merge Whether or not configuration should be merged.
-     * @return mixed
      */
     public function config($key = null, $value = null, $merge = true)
     {
         return call_user_func_array([$this->_engine, 'config'], func_get_args());
-    }
-
-    /**
-     * Returns the config.
-     *
-     * @param string|null $key The key to get or null for the whole config.
-     * @param mixed $default The return value when the key does not exist.
-     * @return mixed Config value being read.
-     */
-    public function getConfig($key = null, $default = null)
-    {
-        return $this->_engine->getConfig($key, $default);
-    }
-
-    /**
-     * Sets the config.
-     *
-     * @param string|array $key The key to set, or a complete array of configs.
-     * @param mixed|null $value The value to set.
-     * @param bool $merge Whether to recursively merge or overwrite existing config, defaults to true.
-     * @return $this
-     * @throws \Cake\Core\Exception\Exception When trying to set a key that is invalid.
-     */
-    public function setConfig($key, $value = null, $merge = true)
-    {
-        return $this->_engine->setConfig($key, $value, $merge);
     }
 
     /**
@@ -295,7 +257,6 @@ class DebugEngine extends CacheEngine
         DebugTimer::start('Cache.clearGroup ' . $group);
         $result = $this->_engine->clearGroup($group);
         DebugTimer::stop('Cache.clearGroup ' . $group);
-
         return $result;
     }
 
@@ -308,10 +269,8 @@ class DebugEngine extends CacheEngine
     {
         if (!empty($this->_engine)) {
             list($ns, $class) = namespaceSplit(get_class($this->_engine));
-
             return str_replace('Engine', '', $class);
         }
-
         return $this->_config['className'];
     }
 }

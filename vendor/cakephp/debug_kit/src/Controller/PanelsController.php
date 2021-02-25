@@ -12,22 +12,38 @@
  */
 namespace DebugKit\Controller;
 
+use Cake\Controller\Controller;
+use Cake\Core\Configure;
 use Cake\Event\Event;
-use Cake\Http\Exception\NotFoundException;
+use Cake\Network\Exception\NotFoundException;
 
 /**
  * Provides access to panel data.
- *
- * @property \DebugKit\Model\Table\PanelsTable $Panels
  */
-class PanelsController extends DebugKitController
+class PanelsController extends Controller
 {
+
     /**
      * components
      *
      * @var array
      */
     public $components = ['RequestHandler', 'Cookie'];
+
+    /**
+     * Before filter handler.
+     *
+     * @param \Cake\Event\Event $event The event.
+     * @return void
+     * @throws \Cake\Network\Exception\NotFoundException
+     */
+    public function beforeFilter(Event $event)
+    {
+        // TODO add config override.
+        if (!Configure::read('debug')) {
+            throw new NotFoundException();
+        }
+    }
 
     /**
      * Before render handler.
@@ -37,15 +53,10 @@ class PanelsController extends DebugKitController
      */
     public function beforeRender(Event $event)
     {
-        $this->viewBuilder()
-            ->setHelpers([
-                'Form', 'Html', 'Number', 'Url', 'DebugKit.Toolbar',
-                'DebugKit.Credentials', 'DebugKit.SimpleGraph',
-            ])
-            ->setLayout('DebugKit.toolbar');
-
-        if (!$this->request->is('json')) {
-            $this->viewBuilder()->setClassName('DebugKit.Ajax');
+        $builder = $this->viewBuilder();
+        if (!$builder->className()) {
+            $builder->layout('DebugKit.panel')
+                ->className('DebugKit.Ajax');
         }
     }
 
@@ -54,7 +65,7 @@ class PanelsController extends DebugKitController
      *
      * @param string $requestId Request id
      * @return void
-     * @throws \Cake\Http\Exception\NotFoundException
+     * @throws \Cake\Network\Exception\NotFoundException
      */
     public function index($requestId = null)
     {
@@ -65,7 +76,7 @@ class PanelsController extends DebugKitController
         }
         $this->set([
             '_serialize' => ['panels'],
-            'panels' => $panels,
+            'panels' => $panels
         ]);
     }
 
@@ -82,8 +93,6 @@ class PanelsController extends DebugKitController
         $panel = $this->Panels->get($id);
 
         $this->set('panel', $panel);
-        // @codingStandardsIgnoreStart
-        $this->set(@unserialize($panel->content));
-        // @codingStandardsIgnoreEnd
+        $this->set(unserialize($panel->content));
     }
 }

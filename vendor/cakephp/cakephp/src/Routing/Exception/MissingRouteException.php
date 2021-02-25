@@ -1,14 +1,14 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
  * Licensed under The MIT License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  * @since         3.0.0
- * @license       https://opensource.org/licenses/mit-license.php MIT License
+ * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\Routing\Exception;
 
@@ -20,30 +20,20 @@ use Cake\Core\Exception\Exception;
  */
 class MissingRouteException extends Exception
 {
+
     /**
      * {@inheritDoc}
      */
     protected $_messageTemplate = 'A route matching "%s" could not be found.';
 
     /**
-     * Message template to use when the requested method is included.
-     *
-     * @var string
-     */
-    protected $_messageTemplateWithMethod = 'A "%s" route matching "%s" could not be found.';
-
-    /**
      * {@inheritDoc}
      */
-    public function __construct($message, $code = 404, $previous = null)
+    public function __construct($message, $code = 404)
     {
-        if (is_array($message)) {
-            if (isset($message['message'])) {
-                $this->_messageTemplate = $message['message'];
-            } elseif (isset($message['method']) && $message['method']) {
-                $this->_messageTemplate = $this->_messageTemplateWithMethod;
-            }
+        if (is_array($message) && isset($message['message'])) {
+            $this->_messageTemplate = $message['message'];
         }
-        parent::__construct($message, $code, $previous);
+        parent::__construct($message, $code);
     }
 }

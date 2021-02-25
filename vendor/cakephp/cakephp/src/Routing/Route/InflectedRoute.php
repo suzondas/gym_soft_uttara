@@ -1,16 +1,16 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- * @link          https://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * @link          http://cakephp.org CakePHP(tm) Project
  * @since         3.0.0
- * @license       https://opensource.org/licenses/mit-license.php MIT License
+ * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\Routing\Route;
 
@@ -22,6 +22,7 @@ use Cake\Utility\Inflector;
  */
 class InflectedRoute extends Route
 {
+
     /**
      * Flag for tracking whether or not the defaults have been inflected.
      *
@@ -37,12 +38,11 @@ class InflectedRoute extends Route
      * plugin keys to their camelized form.
      *
      * @param string $url The URL to parse
-     * @param string $method The HTTP method being matched.
      * @return array|false An array of request parameters, or false on failure.
      */
-    public function parse($url, $method = '')
+    public function parse($url)
     {
-        $params = parent::parse($url, $method);
+        $params = parent::parse($url);
         if (!$params) {
             return false;
         }
@@ -57,7 +57,6 @@ class InflectedRoute extends Route
                 $params['plugin'] = Inflector::camelize($vendor) . '/' . Inflector::camelize($plugin);
             }
         }
-
         return $params;
     }
 
@@ -78,7 +77,6 @@ class InflectedRoute extends Route
             $this->_inflectedDefaults = true;
             $this->defaults = $this->_underscore($this->defaults);
         }
-
         return parent::match($url, $context);
     }
 
@@ -96,7 +94,6 @@ class InflectedRoute extends Route
         if (!empty($url['plugin'])) {
             $url['plugin'] = Inflector::underscore($url['plugin']);
         }
-
         return $url;
     }
 }

@@ -26,13 +26,19 @@ class FileResource implements SelfCheckingResourceInterface, \Serializable
     private $resource;
 
     /**
+     * Constructor.
+     *
      * @param string $resource The file path to the resource
      *
      * @throws \InvalidArgumentException
      */
     public function __construct($resource)
     {
-        $this->resource = realpath($resource) ?: (file_exists($resource) ? $resource : false);
+        $this->resource = realpath($resource);
+
+        if (false === $this->resource && file_exists($resource)) {
+            $this->resource = $resource;
+        }
 
         if (false === $this->resource) {
             throw new \InvalidArgumentException(sprintf('The file "%s" does not exist.', $resource));
@@ -48,7 +54,7 @@ class FileResource implements SelfCheckingResourceInterface, \Serializable
     }
 
     /**
-     * @return string The canonicalized, absolute path to the resource
+     * @return string The canonicalized, absolute path to the resource.
      */
     public function getResource()
     {
@@ -60,20 +66,14 @@ class FileResource implements SelfCheckingResourceInterface, \Serializable
      */
     public function isFresh($timestamp)
     {
-        return false !== ($filemtime = @filemtime($this->resource)) && $filemtime <= $timestamp;
+        return file_exists($this->resource) && @filemtime($this->resource) <= $timestamp;
     }
 
-    /**
-     * @internal
-     */
     public function serialize()
     {
         return serialize($this->resource);
     }
 
-    /**
-     * @internal
-     */
     public function unserialize($serialized)
     {
         $this->resource = unserialize($serialized);

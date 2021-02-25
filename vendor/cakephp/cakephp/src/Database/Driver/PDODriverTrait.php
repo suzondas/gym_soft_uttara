@@ -1,35 +1,33 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- * @link          https://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * @link          http://cakephp.org CakePHP(tm) Project
  * @since         3.0.0
- * @license       https://opensource.org/licenses/mit-license.php MIT License
+ * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\Database\Driver;
 
 use Cake\Database\Query;
 use Cake\Database\Statement\PDOStatement;
 use PDO;
-use PDOException;
 
 /**
  * PDO driver trait
- *
- * @deprecated 3.6.0 The methods of this trait have been added to `Driver` class.
  */
 trait PDODriverTrait
 {
+
     /**
      * Instance of PDO.
      *
-     * @var \PDO|null
+     * @var \PDO
      */
     protected $_connection;
 
@@ -49,7 +47,6 @@ trait PDODriverTrait
             $config['flags']
         );
         $this->connection($connection);
-
         return true;
     }
 
@@ -58,7 +55,7 @@ trait PDODriverTrait
      * If first argument is passed, it will set internal connection object or
      * result to the value passed
      *
-     * @param \PDO|null $connection The PDO connection instance.
+     * @param null|\PDO $connection The PDO connection instance.
      * @return \PDO connection object used internally
      */
     public function connection($connection = null)
@@ -66,7 +63,6 @@ trait PDODriverTrait
         if ($connection !== null) {
             $this->_connection = $connection;
         }
-
         return $this->_connection;
     }
 
@@ -81,7 +77,7 @@ trait PDODriverTrait
     }
 
     /**
-     * Checks whether or not the driver is connected.
+     * Check whether or not the driver is connected.
      *
      * @return bool
      */
@@ -92,12 +88,12 @@ trait PDODriverTrait
         } else {
             try {
                 $connected = $this->_connection->query('SELECT 1');
-            } catch (PDOException $e) {
+            } catch (\PDOException $e) {
                 $connected = false;
             }
         }
-
-        return (bool)$connected;
+        $this->connected = !empty($connected);
+        return $this->connected;
     }
 
     /**
@@ -111,7 +107,6 @@ trait PDODriverTrait
         $this->connect();
         $isObject = $query instanceof Query;
         $statement = $this->_connection->prepare($isObject ? $query->sql() : $query);
-
         return new PDOStatement($statement, $this);
     }
 
@@ -126,7 +121,6 @@ trait PDODriverTrait
         if ($this->_connection->inTransaction()) {
             return true;
         }
-
         return $this->_connection->beginTransaction();
     }
 
@@ -141,7 +135,6 @@ trait PDODriverTrait
         if (!$this->_connection->inTransaction()) {
             return false;
         }
-
         return $this->_connection->commit();
     }
 
@@ -156,8 +149,7 @@ trait PDODriverTrait
         if (!$this->_connection->inTransaction()) {
             return false;
         }
-
-        return $this->_connection->rollBack();
+        return $this->_connection->rollback();
     }
 
     /**
@@ -170,7 +162,6 @@ trait PDODriverTrait
     public function quote($value, $type)
     {
         $this->connect();
-
         return $this->_connection->quote($value, $type);
     }
 
@@ -184,7 +175,6 @@ trait PDODriverTrait
     public function lastInsertId($table = null, $column = null)
     {
         $this->connect();
-
         return $this->_connection->lastInsertId($table);
     }
 
@@ -196,7 +186,6 @@ trait PDODriverTrait
     public function supportsQuoting()
     {
         $this->connect();
-
         return $this->_connection->getAttribute(PDO::ATTR_DRIVER_NAME) !== 'odbc';
     }
 }
