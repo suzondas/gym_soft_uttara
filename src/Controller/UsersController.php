@@ -165,7 +165,7 @@ class UsersController extends AppController
     public function redirectFromKivy()
     {
         $membership_data = TableRegistry::get("GymMember")->find("all", ['contain' => ['Membership']])->where(["member_id" => $_GET["id"]])->first();
-        header('Location: http://door.fitnessplusbd.com/uttara/GymMember/viewMember/'.$membership_data->id);
+        header('Location: http://159.65.224.13/uttara/GymMember/viewMember/'.$membership_data->id);
         exit;
     }
 
