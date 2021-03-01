@@ -8,6 +8,7 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/ajgl/breakpoint-twig-extension" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/aptoma/twig-markdown" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/asm89/twig-cache-extension" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/aura/installer-default" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/aura/intl" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/cakephp/bake" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/cakephp/cakephp" />
